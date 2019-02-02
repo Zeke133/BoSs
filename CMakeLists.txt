@@ -62,7 +62,7 @@ set_property(
             # -mcpu=cortex-m3
             # -mthumb
             -g                      # debug mode
-            # -Os                     # optimisation
+            -Os                     # optimisation
             -Wall
             # Bare metal specific flags
             --specs=nano.specs      # To use newlib-nano

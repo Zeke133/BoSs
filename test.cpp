@@ -1,19 +1,21 @@
 
 extern "C" {
 
-volatile unsigned int * const UART0DR = (unsigned int *)0x101f1000;
+// address of UART0 data register on this MCU
+volatile unsigned int * const UART0DR = (unsigned int *)0x4000c000;
  
-void print_uart0(const char *s) {
+void print_str(const char *s) {
 
-        while(*s != '\0') { /* Loop until end of string */
-        *UART0DR = (unsigned int)(*s); /* Transmit char */
-        s++; /* Next char */
+        while(*s != '\0') {
+            
+            *UART0DR = (unsigned int)(*s); /* Transmit char */
+            s++; /* Next char */
     }
 }
  
 void c_entry() {
 
-    print_uart0("Hello world!\n");
+    print_str("Hello ARM!\n");
 }
 
 }
