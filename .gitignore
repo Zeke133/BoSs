@@ -14,3 +14,5 @@ build
 *.exe
 *.out
 *.hex
+*.bin
+*.sym

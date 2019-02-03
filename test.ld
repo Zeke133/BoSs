@@ -1,3 +1,8 @@
+MEMORY
+{
+	
+}
+
 SECTIONS
 {
 	. = 0x0;                    /*ROM (FLASH) address start*/

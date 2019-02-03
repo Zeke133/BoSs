@@ -1,4 +1,0 @@
-00010000 T print_uart0
-00010054 T c_entry
-00010070 T _Reset
-00011090 R stack_top
