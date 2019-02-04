@@ -8,18 +8,28 @@ project(
     HOMEPAGE_URL    "https://github.com/Zeke133/osStudy"
     LANGUAGES
         ASM     # startup procedure
-        C       # user project
+        # C       # user project
         CXX     # user project
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # set(CMAKE_VERBOSE_MAKEFILE ON)
 
+# ------------------------------------------------------------
+# Unit tests
+# enable_testing()
+# add_subdirectory(unitTests)
+# add_test(
+#     NAME utils
+#     COMMAND unitTests
+# )
+
+# ------------------------------------------------------------
 # Startup procedure
 add_library(startup OBJECT)
 target_sources(
         startup
-    PRIVATE startup.s
+    PRIVATE sources/startup/startup.s
 )
 set_property(
     TARGET
@@ -34,15 +44,12 @@ set_property(
             -g
 )
 
-# Module
-add_library(module OBJECT)
-target_sources(
-        module
-    PRIVATE test
-)
+# ------------------------------------------------------------
+# OS Modules
+add_subdirectory(sources)
 set_property(
     TARGET
-        module
+        modules
     APPEND
     PROPERTY
         COMPILE_OPTIONS
@@ -51,14 +58,30 @@ set_property(
             -march=armv7-m
             -mcpu=cortex-m3
             -Wall
-            -g
+            -g                      # debug mode
+            -Os                     # optimisation
             -ffreestanding
+            --specs=nano.specs      # To use newlib-nano
+            -ffunction-sections     # which split functions and data into their own ELF sections.
+            -fdata-sections         # This allows the linker to eliminate
+                                    # additional unused code when passed --gc-sections
+            -fno-exceptions         # in libs
+            -fno-non-call-exceptions
+            -fno-rtti
+            -fno-use-cxa-atexit     # Teardown code (including global destructors) can be omitted
+)
+set_property(
+    TARGET
+        modules
+    PROPERTY
+        COMPILE_FEATURES
+            cxx_std_17
 )
 
 # ------------------------------------------------------------
 # Link firmware
 add_executable(os.elf)
-target_link_libraries(os.elf PRIVATE startup module)
+target_link_libraries(os.elf PRIVATE startup modules)
 
 set_target_properties(
         os.elf
@@ -69,19 +92,19 @@ set_target_properties(
 # ---
 # Link properties
 set(MAP_FILE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin/os.map)
-set(LINKER_SCRIPT_PATH ${PROJECT_SOURCE_DIR}/test.ld)
+set(LINKER_SCRIPT_PATH ${PROJECT_SOURCE_DIR}/linkScripts/linkerScript.ld)
+# set(PLATFORM_LINK_FLAGS     "-mcpu=cortex-m3 -mthumb")
 set(PLATFORM_LINK_FLAGS     "")
-# set(PLATFORM_LINK_FLAGS     "-mcpu=cortex-m3")
-set(EMBEDDED_LINK_FLAGS     "-nostartfiles")
 # set(EMBEDDED_LINK_FLAGS     "--specs=nano.specs --specs=nosys.specs -nostartfiles")
-set(USER_LINK_FLAG          "-g -Wl,-Map=${MAP_FILE_OUTPUT_PATH}")
+set(EMBEDDED_LINK_FLAGS     "-nostartfiles")
+# set(USER_LINK_FLAG          "-Os -g -Wl,-Map=${MAP_FILE_OUTPUT_PATH} -Wl,-cref -Wl,--gc-sections")
+set(USER_LINK_FLAG          "-Os -g -Wl,-Map=${MAP_FILE_OUTPUT_PATH} -Wl,--gc-sections")
 set_property(
     TARGET os.elf
     PROPERTY
         LINK_FLAGS
             # Stupid syntax let flags be defined only in one string
-            # "${PLATFORM_LINK_FLAGS}  ${EMBEDDED_LINK_FLAGS} ${USER_LINK_FLAG} -Wl,-T${LINKER_SCRIPT_PATH}"
-            "${EMBEDDED_LINK_FLAGS} ${USER_LINK_FLAG} -Wl,-T${LINKER_SCRIPT_PATH}"
+            "${PLATFORM_LINK_FLAGS}  ${EMBEDDED_LINK_FLAGS} ${USER_LINK_FLAG} -Wl,-T${LINKER_SCRIPT_PATH}"
 )
 
 # ------------------------------------------------------------
