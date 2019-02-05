@@ -6,6 +6,10 @@ MEMORY
 	RAM (rwx)	: ORIGIN = 0x20000000, LENGTH = 20K		/* RAM memory */
 }
 
+/*
+ENTRY(Reset_Handler)
+*/
+
 SECTIONS
 {
 	/* ". = 0x0;" or "ENTRY()" are not needed when MEMORY is defined */
