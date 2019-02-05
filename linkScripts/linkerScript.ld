@@ -1,15 +1,13 @@
 /* ARM Cortex-M3 Linker Script */
 
+/* Configure memory regions. */
 MEMORY
 {
 	ROM (rx)	: ORIGIN = 0x00000000, LENGTH = 128K	/* Flash memory */
 	RAM (rwx)	: ORIGIN = 0x20000000, LENGTH = 20K		/* RAM memory */
 }
 
-/*
-ENTRY(Reset_Handler)
-*/
-
+/* Configure output sections. */
 SECTIONS
 {
 	/* ". = 0x0;" or "ENTRY()" are not needed when MEMORY is defined */
@@ -21,10 +19,10 @@ SECTIONS
 		KEEP(*(.vector))		/* Don't let GC .vector */
 	} > ROM
 
-	/* Executable code and constant data here */
+	/* Executable code to .text section */
 	.text :
 	{
-		. = ALIGN(4);			/* Align current address pointer to 4 */
+		. = ALIGN(4);
 
 		/* Executable code */
 		*(.text)				/* put here .text sections from all object files */
@@ -53,14 +51,34 @@ SECTIONS
  		*(.dtors)
 		*/
 
-		/* Constant data */
-		*(.rodata*)
-
 		/* Exception frames information */
 		/*
 		KEEP(*(.eh_frame*))
 		*/
 	} > ROM
+	
+	/* Exceptions unwind info */
+	/*
+	.ARM.extab :
+	{
+		*(.ARM.extab* .gnu.linkonce.armextab.*)
+	} > ROM
+	__exidx_start = .;
+	.ARM.exidx :
+	{
+		*(.ARM.exidx* .gnu.linkonce.armexidx.*)
+	} > ROM
+	__exidx_end = .;
+	*/
+	
+    _etext = .;             /* define a global symbols at end of code */
+    
+    /* Constant data to .rodata section */
+    .rodata :
+    {
+        . = ALIGN(4);
+        *(.rodata)
+    } > ROM
 
 	. = 0x20000000;             /*RAM address start*/
 
