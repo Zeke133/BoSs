@@ -93,12 +93,11 @@ set_target_properties(
 # Link properties
 set(MAP_FILE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin/os.map)
 set(LINKER_SCRIPT_PATH ${PROJECT_SOURCE_DIR}/linkScripts/linkerScript.ld)
-# set(PLATFORM_LINK_FLAGS     "-mcpu=cortex-m3 -mthumb")
-set(PLATFORM_LINK_FLAGS     "")
+set(PLATFORM_LINK_FLAGS     "-mcpu=cortex-m3 -mthumb")
 # set(EMBEDDED_LINK_FLAGS     "--specs=nano.specs --specs=nosys.specs -nostartfiles")
+# -nostdlib same as passing -nodefaultlibs and -nostartfiles
 set(EMBEDDED_LINK_FLAGS     "-nostartfiles")
-# set(USER_LINK_FLAG          "-Os -g -Wl,-Map=${MAP_FILE_OUTPUT_PATH} -Wl,-cref -Wl,--gc-sections")
-set(USER_LINK_FLAG          "-Os -g -Wl,-Map=${MAP_FILE_OUTPUT_PATH} -Wl,--gc-sections")
+set(USER_LINK_FLAG          "-Os -g -Wl,-Map=${MAP_FILE_OUTPUT_PATH} -Wl,-cref -Wl,--gc-sections")
 set_property(
     TARGET os.elf
     PROPERTY

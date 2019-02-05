@@ -1,17 +1,62 @@
+/* ARM Cortex-M3 Linker Script */
+
 MEMORY
 {
-	FLASH(rx)	: ORIGIN = 0x08000000, LENGTH = 128K
-	RAM(rwx)	: ORIGIN = 0x20000000, LENGTH = 20K
+	ROM (rx)	: ORIGIN = 0x00000000, LENGTH = 128K	/* Flash memory */
+	RAM (rwx)	: ORIGIN = 0x20000000, LENGTH = 20K		/* RAM memory */
 }
 
 SECTIONS
 {
-	. = 0x0;                    /*ROM (FLASH) address start*/
+	/* ". = 0x0;" or "ENTRY()" are not needed when MEMORY is defined */
 
-	.text : {                   /*Text section of executable*/
-		startup.*(.text)        /*put here .text sections from object files*/
-		test.*(.text)           /*put here .text sections from object files*/
-	}
+	/* ARM needs Vector table to be placed at 0x00000000 */
+	.vector :
+	{
+		. = ALIGN(4);			/* Align current address pointer to 4 */
+		KEEP(*(.vector))		/* Don't let GC .vector */
+	} > ROM
+
+	/* Executable code and constant data here */
+	.text :
+	{
+		. = ALIGN(4);			/* Align current address pointer to 4 */
+
+		/* Executable code */
+		*(.text)				/* put here .text sections from all object files */
+		
+		/* Global constructors and destructors sections */
+		/*
+		KEEP(*(.init))
+		KEEP(*(.fini))
+		*/
+
+		/* .ctors */
+		/*
+		*crtbegin.o(.ctors)
+		*crtbegin?.o(.ctors)
+		*(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
+		*(SORT(.ctors.*))
+		*(.ctors)
+		*/
+
+		/* .dtors */
+ 		/*
+		*crtbegin.o(.dtors)
+ 		*crtbegin?.o(.dtors)
+ 		*(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
+ 		*(SORT(.dtors.*))
+ 		*(.dtors)
+		*/
+
+		/* Constant data */
+		*(.rodata*)
+
+		/* Exception frames information */
+		/*
+		KEEP(*(.eh_frame*))
+		*/
+	} > ROM
 
 	. = 0x20000000;             /*RAM address start*/
 
