@@ -43,7 +43,17 @@ void sysTickInit() {
 }
 
 extern "C" {
-void startupProcedure() {
+
+/* System initialization
+ */
+void SystemInit(void) {
+
+    printStr("ARM Cortex-M3 has started up!\n");
+}
+
+/* Pre-main initialisation
+ */
+void coreInit(void) {
 
     sysTickInit();
 
@@ -78,4 +88,5 @@ void startupProcedure() {
     // sleep forever
     while(1) ;
 }
+
 }

@@ -29,7 +29,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(startup OBJECT)
 target_sources(
         startup
-    PRIVATE sources/startup/startup.s
+    PRIVATE platformInit/startup_ARMCM3.S
 )
 set_property(
     TARGET
@@ -92,18 +92,18 @@ set_target_properties(
 # ---
 # Link properties
 set(MAP_FILE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin/os.map)
-set(LINKER_SCRIPT_PATH ${PROJECT_SOURCE_DIR}/linkScripts/linkerScript.ld)
+set(LINKER_SCRIPT_PATH ${PROJECT_SOURCE_DIR}/platformInit/linkerScript.ld)
 set(PLATFORM_LINK_FLAGS     "-mcpu=cortex-m3 -mthumb")
 # set(EMBEDDED_LINK_FLAGS     "--specs=nano.specs --specs=nosys.specs -nostartfiles")
 # -nostdlib same as passing -nodefaultlibs and -nostartfiles
-set(EMBEDDED_LINK_FLAGS     "-nostartfiles")
+set(EMBEDDED_LINK_FLAGS     "--specs=nano.specs --specs=nosys.specs -nostartfiles")
 set(USER_LINK_FLAG          "-Os -g -Wl,-Map=${MAP_FILE_OUTPUT_PATH} -Wl,-cref -Wl,--gc-sections")
 set_property(
     TARGET os.elf
     PROPERTY
         LINK_FLAGS
-            # Stupid syntax let flags be defined only in one string
             "${PLATFORM_LINK_FLAGS}  ${EMBEDDED_LINK_FLAGS} ${USER_LINK_FLAG} -Wl,-T${LINKER_SCRIPT_PATH}"
+            # Stupid syntax let flags be defined only in one string
 )
 
 # ------------------------------------------------------------
