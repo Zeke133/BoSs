@@ -8,8 +8,8 @@ project(
     HOMEPAGE_URL    "https://github.com/Zeke133/osStudy"
     LANGUAGES
         ASM     # startup procedure
-        # C       # user project
-        CXX     # user project
+        C
+        CXX
 )
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -29,7 +29,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_library(startup OBJECT)
 target_sources(
         startup
-    PRIVATE platformInit/startup_ARMCM3.S
+    PRIVATE platformInitARMCortexM3/startup.s
 )
 set_property(
     TARGET
@@ -45,7 +45,7 @@ set_property(
 )
 
 # ------------------------------------------------------------
-# OS Modules
+# Modules
 add_subdirectory(sources)
 set_property(
     TARGET
@@ -57,9 +57,9 @@ set_property(
             -mlittle-endian
             -march=armv7-m
             -mcpu=cortex-m3
-            -Wall
             -g                      # debug mode
-            -Os                     # optimisation
+            -Wall
+            -Os                     # optimisation size
             -ffreestanding
             --specs=nano.specs      # To use newlib-nano
             -ffunction-sections     # which split functions and data into their own ELF sections.
@@ -92,18 +92,20 @@ set_target_properties(
 # ---
 # Link properties
 set(MAP_FILE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin/os.map)
-set(LINKER_SCRIPT_PATH ${PROJECT_SOURCE_DIR}/platformInit/linkerScript.ld)
-set(PLATFORM_LINK_FLAGS     "-mcpu=cortex-m3 -mthumb")
+set(LINKER_SCRIPT_PATH ${PROJECT_SOURCE_DIR}/platformInitARMCortexM3/linkerScript.ld)
+set(USER_LINK_FLAG          "-Map=${MAP_FILE_OUTPUT_PATH} -cref --gc-sections")
+# set(USER_LINK_FLAG          "-Os -g -Map=${MAP_FILE_OUTPUT_PATH} -cref --gc-sections")
+set(PLATFORM_LINK_FLAGS     "")
+# set(PLATFORM_LINK_FLAGS     "-mcpu=cortex-m3 -mthumb")
+set(EMBEDDED_LINK_FLAGS     "")
 # set(EMBEDDED_LINK_FLAGS     "--specs=nano.specs --specs=nosys.specs -nostartfiles")
 # -nostdlib same as passing -nodefaultlibs and -nostartfiles
-set(EMBEDDED_LINK_FLAGS     "--specs=nano.specs --specs=nosys.specs -nostartfiles")
-set(USER_LINK_FLAG          "-Os -g -Wl,-Map=${MAP_FILE_OUTPUT_PATH} -Wl,-cref -Wl,--gc-sections")
 set_property(
     TARGET os.elf
     PROPERTY
         LINK_FLAGS
-            "${PLATFORM_LINK_FLAGS}  ${EMBEDDED_LINK_FLAGS} ${USER_LINK_FLAG} -Wl,-T${LINKER_SCRIPT_PATH}"
-            # Stupid syntax let flags be defined only in one string
+            "${PLATFORM_LINK_FLAGS}  ${EMBEDDED_LINK_FLAGS} ${USER_LINK_FLAG} -T${LINKER_SCRIPT_PATH}"
+            # CMake syntax let flags be defined only in one string
 )
 
 # ------------------------------------------------------------

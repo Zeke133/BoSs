@@ -1,4 +1,11 @@
-/* ARM Cortex-M3 Linker Script */
+/**
+ * @file    linkerScript.ld
+ * @author  Denis Homutovski
+ * @version V1.0.0
+ * @date    02-09-2019
+ * @brief   ARM Cortex-M3 Linker Script
+ * @copyright GNU Public License.
+ */
 
 /* Linker script to place sections and symbol values. Should be used together
  * with other linker script that defines memory regions FLASH and RAM.
@@ -40,18 +47,13 @@ MEMORY
 /* Configure output sections. */
 SECTIONS
 {
-	/* ARM needs Vector table to be placed at 0x00000000
-	 * Will create separate section for this */
-	.vectors :
-	{
-		. = ALIGN(4);			/* Align current address pointer to 4 */
-		KEEP(*(.vectors))		/* Don't let GC .vector */
-	} > ROM
-
 	/* Executable code to .text section */
 	.text :
 	{
-		. = ALIGN(4);
+		/* ARM needs Vector table to be placed at 0x00000000 */
+		KEEP(*(.vectors))		/* Don't let GC .vector */
+		
+		. = ALIGN(4);			/* Align current address pointer to 4 */
 		*(.text)				/* put here .text sections from all object files */
 		
 		/* This section holds executable instructions that contribute to the process initialization code.
@@ -153,7 +155,7 @@ SECTIONS
 	} > RAM
 	
 	/* Uninitialized data section */
-	.bss :
+	.bss (NOLOAD):
 	{
 		. = ALIGN(4);
 		__bss_start__ = .;
@@ -163,7 +165,7 @@ SECTIONS
 		__bss_end__ = .;
 	} > RAM
 
-	.heap (COPY):
+	.heap (NOLOAD):
 	{
 		__end__ = .;
 		PROVIDE(end = .);
@@ -174,7 +176,7 @@ SECTIONS
 	/* .stack_dummy section doesn't contain any symbols. It is only
 	 * used for linker to calculate size of stack sections, and assign
 	 * values to stack symbols later */
-	.stack_dummy (COPY):
+	.stack_dummy (NOLOAD):
 	{
 		*(.stack*)
 	} > RAM
@@ -189,12 +191,14 @@ SECTIONS
 	ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
 
 	/* Remove information from the standard libraries */
-	/*
 	/DISCARD/ :
 	{
+		
+		*(.ARM.exidx)		/* this can force to not include ARM exception unwinder */
+		/*
 		libc.a ( * )
 		libm.a ( * )
 		libgcc.a ( * )
+		*/
 	}
-	*/
 }

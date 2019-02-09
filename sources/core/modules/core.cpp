@@ -53,7 +53,7 @@ void SystemInit(void) {
 
 /* Pre-main initialisation
  */
-void coreInit(void) {
+void __START(void) {
 
     sysTickInit();
 
@@ -62,7 +62,7 @@ void coreInit(void) {
     printStr("Hello ARM!\n");
 
     unsigned char * regVal = (unsigned char *)REG_CCR;
-    unsigned int value = *regVal;
+    // unsigned int value = *regVal;
     unsigned char tempMSB, tempLSB;
 
     for (int i = 3; i >= 0; --i) {
@@ -74,10 +74,24 @@ void coreInit(void) {
     }
 
     printStr("\n");
+    printStr("__StackTop = ");
+    extern unsigned char * __StackTop;
+
+    for (int i = 0; i < 4; ++i) {
+
+        tempLSB = __StackTop[i] & 0x0f;
+        tempMSB = __StackTop[i] >> 4;
+        printChar(hexTable[tempMSB]);
+        printChar(hexTable[tempLSB]);
+    }
+
+    
+
+    printStr("\n");
     printStr("REG_SYST_CVRRW = ");
 
     regVal = (unsigned char *)REG_SYST_CVRRW;
-    value = *regVal;
+    // value = *regVal;
     for (int i = 0; i < 4; ++i) {
 
         tempLSB = regVal[i] & 0x0f;
