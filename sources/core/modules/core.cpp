@@ -1,8 +1,13 @@
+#include <cstdint>
+
+#include "core_cm3.h"
+#include "thread.hpp"
+
 // SysTick timer
-unsigned int * const REG_SYST_CSRRW = (unsigned int *)0xE000E010;   // Privileged a SysTick Control and Status Register
-unsigned int * const REG_SYST_RVRRW = (unsigned int *)0xE000E014;   // Privileged UNKNOWN SysTick Reload Value Register
-unsigned int * const REG_SYST_CVRRW = (unsigned int *)0xE000E018;   // Privileged UNKNOWN SysTick Current Value Register
-unsigned int * const REG_CSYST_CALIBRO = (unsigned int *)0xE000E01; // Privileged a SysTick Calibration Value Register
+unsigned int * const SYST_CSR = (unsigned int *)0xE000E010;     // Privileged a SysTick Control and Status Register
+unsigned int * const SYST_RVR = (unsigned int *)0xE000E014;     // Privileged UNKNOWN SysTick Reload Value Register
+unsigned int * const SYST_CVR = (unsigned int *)0xE000E018;     // Privileged UNKNOWN SysTick Current Value Register
+unsigned int * const SYST_CALIB = (unsigned int *)0xE000E01;    // Privileged a SysTick Calibration Value Register
 // UART0 data register on this MCU
 unsigned int * const UART0DR = (unsigned int *)0x4000c000;
 
@@ -26,13 +31,13 @@ void printStr(const char *s) {
 void sysTickInit() {
 
     // 1.Program reload value.
-    *REG_SYST_RVRRW = 0x00FFFFFF;   // 0x00000001-0x00FFFFFF. If the SysTick interrupt is required every 100 clock pulses, set RELOAD to 99.
+    *SYST_RVR = 0x000ffff;   // 0x00000001-0x00FFFFFF. If the SysTick interrupt is required every 100 clock pulses, set RELOAD to 99.
 
     // 2.Clear current value.
-    *REG_SYST_CVRRW = 0x0;          // A write of any value clears the field to 0, and also clears the SYST_CSR COUNTFLAG bit to 0.
+    *SYST_CVR = 0x0;          // A write of any value clears the field to 0, and also clears the SYST_CSR COUNTFLAG bit to 0.
 
     // 3.Program Control and Status register.
-    *REG_SYST_CSRRW = 0x5;          // processor clock, enable counter
+    *SYST_CSR = 0x7;          // processor clock 4, enable SysTick exception 2, enable counter 1
     // Bits:
     // [16] COUNTFLAG Returns 1 if timer counted to 0 since last time this was read.
     // [2] CLKSOURCE Indicates the clock source:0 = external clock 1 - processor clock.
@@ -43,6 +48,13 @@ void sysTickInit() {
 }
 
 extern "C" {
+
+void SysTick_Handler(void) {
+
+    // timer_stop();
+    // asm volatile("b task_switch");
+    ContextSwitch();
+}
 
 /* System initialization
  */
@@ -59,7 +71,7 @@ void __START(void) {
 
     const char * hexTable = "0123456789ABCDEF";
 
-    printStr("Hello ARM!\n");
+    printStr("REG_CCR = ");
 
     unsigned char * regVal = (unsigned char *)REG_CCR;
     // unsigned int value = *regVal;
@@ -77,7 +89,7 @@ void __START(void) {
     printStr("__StackTop = ");
     extern unsigned char * __StackTop;
 
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 3; i >= 0; --i) {
 
         tempLSB = __StackTop[i] & 0x0f;
         tempMSB = __StackTop[i] >> 4;
@@ -85,20 +97,22 @@ void __START(void) {
         printChar(hexTable[tempLSB]);
     }
 
-    
-
     printStr("\n");
     printStr("REG_SYST_CVRRW = ");
 
     regVal = (unsigned char *)REG_SYST_CVRRW;
     // value = *regVal;
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 3; i >= 0; --i) {
 
         tempLSB = regVal[i] & 0x0f;
         tempMSB = regVal[i] >> 4;
         printChar(hexTable[tempMSB]);
         printChar(hexTable[tempLSB]);
     }
+
+    uint32_t threadStack[100];  // stack for thread 400 bytes
+    Thread task1;
+
     // sleep forever
     while(1) ;
 }
