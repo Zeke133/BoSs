@@ -62,16 +62,19 @@ ContextSwitch:
 
                 // where from take thread top of the stack value ?
                 // need global pointer for thread stack
-
-                ldr      r0, threadStackTop
-                msr      psp, r0
-
                 // thread contex must be on stack already
                 // so thread init is needed
-
-
+                LDR      R0, =threadControlBlock
+                LDR      R4, [R0], #1
+                LDR      R5, [R0], #1
+                LDR      R6, [R0], #1
+                LDR      R7, [R0], #1
+                LDR      R8, [R0], #1
+                LDR      R9, [R0], #1
+                LDR      R10, [R0], #1
+                LDR      R11, [R0], #1
+                MSR      PSP, R0
+                MOV      LR, #0xFFFFFFFD
 
                 .fnend
-                .size    Reset_Handler, . - Reset_Handler
-
                 .end

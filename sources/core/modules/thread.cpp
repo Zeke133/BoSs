@@ -1,7 +1,7 @@
 
 #include "thread.hpp"
 
-void Thread::create(std::function<void()> task, uint32_t stackSizeWords, uint32_t * allocatedStack, uint8_t param) {
+void Thread::create(void(*task)(), uint32_t stackSizeWords, uint32_t * allocatedStack) {
 
     // need to init stack frame for process
 
@@ -9,7 +9,7 @@ void Thread::create(std::function<void()> task, uint32_t stackSizeWords, uint32_
     allocatedStack += stackSizeWords - 1;
 
     *(allocatedStack--) = 0x21000000;        // xPSR
-    *(allocatedStack--) = &task;    // PC (uint32_t) task & TASK_PC_MASK;
+    *(allocatedStack--) = (uint32_t)task;    // PC (uint32_t) task & TASK_PC_MASK;
     *(allocatedStack--) = 0xF1;    // LR - place thread cleaner here???
     *(allocatedStack--) = 12;        // R12
     *(allocatedStack--) = 3;        // R3

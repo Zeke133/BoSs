@@ -1,9 +1,6 @@
 #include <cstdint>
 
-<<<<<<< HEAD
-#include "core_cm3.h"
-=======
->>>>>>> f76522a622cf114e3941f203dd3f4b2c0f7273df
+// #include "core_cm3.h"
 #include "thread.hpp"
 
 // SysTick timer
@@ -14,9 +11,12 @@ unsigned int * const SYST_CALIB = (unsigned int *)0xE000E01;    // Privileged a 
 // UART0 data register on this MCU
 unsigned int * const UART0DR = (unsigned int *)0x4000c000;
 
-unsigned int * const REG_CPUID = (unsigned int *)0xE000ED00; // 412FC231
-unsigned int * const REG_STCSR = (unsigned int *)0xE000E010;
-unsigned int * const REG_CCR = (unsigned int *)0xE000ED14;
+unsigned int * const CPUID = (unsigned int *)0xE000ED00; // 412FC231
+unsigned int * const STCSR = (unsigned int *)0xE000E010;
+unsigned int * const CCR = (unsigned int *)0xE000ED14;
+
+//
+Thread * threadControlBlock;
 
 void printChar(unsigned char sym) {
 
@@ -52,9 +52,12 @@ void sysTickInit() {
 
 extern "C" {
 
+extern void ContextSwitch(void);
+
 void SysTick_Handler(void) {
 
     // timer_stop();
+    *SYST_CSR = 0;
     // asm volatile("b task_switch");
     ContextSwitch();
 }
@@ -66,45 +69,19 @@ void SystemInit(void) {
     printStr("ARM Cortex-M3 has started up!\n");
 }
 
+void func1(void) {
+
+    printStr("TASK1!\n");
+}
+
 /* Pre-main initialisation
  */
 void __START(void) {
 
-    sysTickInit();
-
     const char * hexTable = "0123456789ABCDEF";
-
-    printStr("REG_CCR = ");
-
-    unsigned char * regVal = (unsigned char *)REG_CCR;
-    // unsigned int value = *regVal;
+    printStr("CCR = ");
+    unsigned char * regVal = (unsigned char *)CCR;
     unsigned char tempMSB, tempLSB;
-
-    for (int i = 3; i >= 0; --i) {
-
-        tempLSB = regVal[i] & 0x0f;
-        tempMSB = regVal[i] >> 4;
-        printChar(hexTable[tempMSB]);
-        printChar(hexTable[tempLSB]);
-    }
-
-    printStr("\n");
-    printStr("__StackTop = ");
-    extern unsigned char * __StackTop;
-
-    for (int i = 3; i >= 0; --i) {
-
-        tempLSB = __StackTop[i] & 0x0f;
-        tempMSB = __StackTop[i] >> 4;
-        printChar(hexTable[tempMSB]);
-        printChar(hexTable[tempLSB]);
-    }
-
-    printStr("\n");
-    printStr("REG_SYST_CVRRW = ");
-
-    regVal = (unsigned char *)REG_SYST_CVRRW;
-    // value = *regVal;
     for (int i = 3; i >= 0; --i) {
 
         tempLSB = regVal[i] & 0x0f;
@@ -115,7 +92,11 @@ void __START(void) {
 
     uint32_t threadStack[100];  // stack for thread 400 bytes
     Thread task1;
+    task1.create(func1, 100, (uint32_t *)&threadStack);
+    threadControlBlock = &task1;
 
+    sysTickInit();
+    
     // sleep forever
     while(1) ;
 }

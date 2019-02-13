@@ -30,6 +30,7 @@ add_library(startup OBJECT)
 target_sources(
         startup
     PRIVATE platformInitARMCortexM3/startup.s
+    PRIVATE sources/core/contextSwitch.s
 )
 set_property(
     TARGET
