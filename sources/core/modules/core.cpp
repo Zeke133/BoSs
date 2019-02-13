@@ -1,3 +1,7 @@
+#include <cstdint>
+
+#include "thread.hpp"
+
 // SysTick timer
 unsigned int * const REG_SYST_CSRRW = (unsigned int *)0xE000E010;   // Privileged a SysTick Control and Status Register
 unsigned int * const REG_SYST_RVRRW = (unsigned int *)0xE000E014;   // Privileged UNKNOWN SysTick Reload Value Register
@@ -59,7 +63,7 @@ void __START(void) {
 
     const char * hexTable = "0123456789ABCDEF";
 
-    printStr("Hello ARM!\n");
+    printStr("REG_CCR = ");
 
     unsigned char * regVal = (unsigned char *)REG_CCR;
     // unsigned int value = *regVal;
@@ -77,7 +81,7 @@ void __START(void) {
     printStr("__StackTop = ");
     extern unsigned char * __StackTop;
 
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 3; i >= 0; --i) {
 
         tempLSB = __StackTop[i] & 0x0f;
         tempMSB = __StackTop[i] >> 4;
@@ -85,20 +89,22 @@ void __START(void) {
         printChar(hexTable[tempLSB]);
     }
 
-    
-
     printStr("\n");
     printStr("REG_SYST_CVRRW = ");
 
     regVal = (unsigned char *)REG_SYST_CVRRW;
     // value = *regVal;
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 3; i >= 0; --i) {
 
         tempLSB = regVal[i] & 0x0f;
         tempMSB = regVal[i] >> 4;
         printChar(hexTable[tempMSB]);
         printChar(hexTable[tempLSB]);
     }
+
+    uint32_t threadStack[100];  // stack for thread 400 bytes
+    Thread task1;
+
     // sleep forever
     while(1) ;
 }
