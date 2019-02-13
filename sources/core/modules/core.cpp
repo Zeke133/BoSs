@@ -1,6 +1,9 @@
 #include <cstdint>
 
+<<<<<<< HEAD
 #include "core_cm3.h"
+=======
+>>>>>>> f76522a622cf114e3941f203dd3f4b2c0f7273df
 #include "thread.hpp"
 
 // SysTick timer
