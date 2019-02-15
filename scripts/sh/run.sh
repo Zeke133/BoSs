@@ -1,0 +1,1 @@
+qemu-system-arm.exe -M lm3s811evb -kernel ./bin/os.elf -nographic -icount 1
