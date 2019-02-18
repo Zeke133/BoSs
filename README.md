@@ -1,12 +1,18 @@
-# osStudy
+# BOSS
 
-Project of OS scheduler for ARM Cortex M3 with emulation on Qemu.
+## Bare Operating System Solution
 
-Plan:
+Project of OS core (scheduler) for ARM Cortex M3 microcontrollers with emulation on Qemu.
 
-0. Clean project from garbage
-1. Create Linker script and normal startup with Vectors table to run on Qemu
-2. Change to PSP and unprivileged mode - check if works
-3. Simple Threads primitive to Run
-4. Write context switch procedure
-5. Check if threads run
+**To Do:**
+
+- [ ] Clean project from garbage
+- [x] Create Linker script and normal startup with Vectors table to run on Qemu
+- [ ] Change to PSP and **unprivileged mode** check if works
+- [x] Simple Threads primitive to Run
+- [x] Write context switch procedure
+- [x] Check if threads run
+- [ ] Create PendingSV handler on ASM - problem that C++ handler procedure saves some registers on stack each run
+- [ ] Context switch procedures profiling
+- [ ] Stack Overflow detection by "endmarks"
+- [ ] Make user treads to run in Unprivileged mode and one thread for kernel tasks

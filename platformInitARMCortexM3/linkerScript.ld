@@ -39,7 +39,8 @@ MEMORY
 {
 	ROM (rx)	: ORIGIN = 0x00000000, LENGTH = 128K	/* Flash memory */
 	/* abnormal 0x08000000 on STM32, 0x00000000 on ARM Cortex-M3 */
-	RAM (rwx)	: ORIGIN = 0x20000000, LENGTH = 20K		/* RAM memory */
+	RAM (rwx)	: ORIGIN = 0x20000000, LENGTH = 8K		/* RAM memory */
+	/* 8K on lm3s811evb QEMU and 20k on STM32F103C8T6 */
 }
 
 /* ". = 0x0;" or "ENTRY()" are not needed when MEMORY is defined */

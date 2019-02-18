@@ -15,8 +15,7 @@ unsigned int * const CPUID = (unsigned int *)0xE000ED00; // 412FC231
 unsigned int * const STCSR = (unsigned int *)0xE000E010;
 unsigned int * const CCR = (unsigned int *)0xE000ED14;
 
-//
-Thread * threadControlBlock;
+Thread * currentThread; // not pointer to SP just to TCB - so need dereference
 
 void printChar(unsigned char sym) {
 
@@ -52,14 +51,61 @@ void sysTickInit() {
 
 extern "C" {
 
-extern void ContextSwitch(void);
+extern void restoreContext(uint32_t * threadStackTop);
+extern void saveContext(uint32_t * threadStackTop);
 
 void SysTick_Handler(void) {
 
-    // timer_stop();
-    *SYST_CSR = 0;
-    // asm volatile("b task_switch");
-    ContextSwitch();
+    // *SYST_CSR = 0;  // timer stop
+
+    /* Trigger the pendSV */
+    // *((uint32_t volatile *)0xE000ED04) = 0x10000000;
+    // 0xE000ED04 represents the address of the System Control Block Register  Interrupt Control and State (INTCTRL) and the value 0x10000000 is the PENDSVSET bit
+
+    if (currentThread == nullptr) return;   // print in core init - no any task was created
+
+    if (currentThread->getState() == Thread::State::initialized) {
+
+        // current thread was just initialized and never run yet
+        // so has no context to save
+
+    } else {
+
+        Thread * nextThread;
+        while ((nextThread = currentThread->getNext()) != nullptr) {
+
+            auto nextThreadState = nextThread->getState();
+            
+            if (nextThreadState == Thread::State::paused) {
+
+                // check some timers or mutex
+                // continue or break as result
+                break;
+            }
+            else if (nextThreadState == Thread::State::running) {
+
+                return; // nothing to do. we have only 1 thread in list
+            }
+            else if (nextThreadState == Thread::State::initialized) {
+
+                break;
+            }
+        }
+
+        currentThread->setState(Thread::State::paused);
+        saveContext((uint32_t*)currentThread);
+        currentThread = nextThread;
+    }
+
+    currentThread->setState(Thread::State::running);
+    restoreContext((uint32_t*)currentThread);
+
+    while (1) { /* here never should get */ }
+}
+
+void PendSV_Handler(void) {
+
+    
 }
 
 /* System initialization
@@ -69,35 +115,31 @@ void SystemInit(void) {
     printStr("ARM Cortex-M3 has started up!\n");
 }
 
-void func1(void) {
-
-    printStr("TASK1!\n");
-}
-
 /* Pre-main initialisation
  */
 void __START(void) {
 
-    const char * hexTable = "0123456789ABCDEF";
-    printStr("CCR = ");
-    unsigned char * regVal = (unsigned char *)CCR;
-    unsigned char tempMSB, tempLSB;
-    for (int i = 3; i >= 0; --i) {
+    // nucleus
 
-        tempLSB = regVal[i] & 0x0f;
-        tempMSB = regVal[i] >> 4;
-        printChar(hexTable[tempMSB]);
-        printChar(hexTable[tempLSB]);
-    }
+    volatile uint32_t thread1Stack[40];     // stack for thread 100x4=400 bytes
+    volatile uint32_t thread2Stack[30];
+    // volatile uint32_t thread3Stack[20];
+    // thread1Stack[0] = 0xf00;                 // here can place MagicInt of stack end
+    // thread1Stack[39] = 0xf39;                // here can place MagicInt of stack top
 
-    uint32_t threadStack[100];  // stack for thread 400 bytes
-    Thread task1;
-    task1.create(func1, 100, (uint32_t *)&threadStack);
-    threadControlBlock = &task1;
+    Thread task1([]() { while(1) { printStr("TASK1!\n"); } }, (sizeof thread1Stack)/4, (uint32_t *)&thread1Stack);
+    Thread task2([]() { while(1) { printStr("TASK2!\n"); } }, (sizeof thread2Stack)/4, (uint32_t *)&thread2Stack);
+    // Thread task3([]() { while(1) { printStr("TASK3!\n"); } }, (sizeof thread3Stack)/4, (uint32_t *)&thread3Stack);
+
+    task1.setNext(&task2);
+    task2.setNext(&task1);
+    // task3.setNext(&task1);  // list should be closed
+
+    currentThread = &task1;
+    //task1.start();
 
     sysTickInit();
     
-    // sleep forever
     while(1) ;
 }
 

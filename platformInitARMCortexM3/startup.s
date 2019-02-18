@@ -128,7 +128,6 @@ __Vectors_End:
                 .align   2
                 .thumb                                      // selects the instruction set being generated
                 .thumb_func                                 // specifies that the following symbol is the name of a Thumb encoded function
-                @ .type    Reset_Handler, %function         // does it needed in combination with .thumb_func ???
                 .globl   Reset_Handler
                 .fnstart
 Reset_Handler:
@@ -183,7 +182,6 @@ Reset_Handler:
  * Default_Handler implementation
  */
                 .thumb_func
-                @ .type    Default_Handler, %function       // is it needed???
                 .weak    Default_Handler
                 .fnstart
 Default_Handler:
