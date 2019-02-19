@@ -15,8 +15,8 @@
 
 // /**@{*/
 // /** Grouped description. */
-// uint8_t ClassTempate::staticAtribute1 = 0;
-// uint8_t ClassTempate::staticAtribute2 = 0;
+Thread * Scheduler::currentThread = nullptr;
+Scheduler::Decision Scheduler::lastDecision = Scheduler::Decision::noAction;
 // /**@}*/
 
 /**
@@ -25,7 +25,7 @@
  * 
  * Implicitly change Decision private atribute
  */
-static void Scheduler::execute() const {
+void Scheduler::takeDecision() {
 
     if (currentThread != nullptr) {
 
@@ -66,5 +66,51 @@ static void Scheduler::execute() const {
         
         lastDecision = Decision::noAction;
         // print in core init - no any task was created
+    }
+}
+
+/**
+ * Some text.
+ * About public method.
+ * 
+ * Implicitly change Decision private atribute
+ */
+void Scheduler::stepThreadList() {
+
+    currentThread->setState(Thread::State::paused);
+    currentThread = currentThread->getNext();
+    currentThread->setState(Thread::State::running);
+}
+
+/**
+ * Some text.
+ * About public method.
+ * 
+ * Implicitly change Decision private atribute
+ */
+void Scheduler::addThread(Thread * thread) {
+
+    // last element must be linked to first one
+    if (currentThread == nullptr) {
+
+        currentThread = thread;
+
+        if (currentThread->getNext() == nullptr) {
+            
+            currentThread->setNext(currentThread);
+        }
+
+    } else {
+
+        auto threadIterator = currentThread;
+        // iterate throw the enclosed list of threads
+        // untill find the last element (has link to current element)
+        while (threadIterator->getNext() != currentThread) {
+
+            threadIterator = threadIterator->getNext();
+        }
+        // insert new thread to the last posititon
+        thread->setNext(threadIterator->getNext);
+        threadIterator->setNext(thread);
     }
 }

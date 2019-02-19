@@ -5,18 +5,15 @@
 #include "scheduler.hpp"
 
 // SysTick timer
-unsigned int * const SYST_CSR = (unsigned int *)0xE000E010;     // Privileged a SysTick Control and Status Register
-unsigned int * const SYST_RVR = (unsigned int *)0xE000E014;     // Privileged UNKNOWN SysTick Reload Value Register
-unsigned int * const SYST_CVR = (unsigned int *)0xE000E018;     // Privileged UNKNOWN SysTick Current Value Register
-unsigned int * const SYST_CALIB = (unsigned int *)0xE000E01;    // Privileged a SysTick Calibration Value Register
+uint32_t * const SYST_CSR = (uint32_t *)0xE000E010;     // Privileged a SysTick Control and Status Register
+uint32_t * const SYST_RVR = (uint32_t *)0xE000E014;     // Privileged UNKNOWN SysTick Reload Value Register
+uint32_t * const SYST_CVR = (uint32_t *)0xE000E018;     // Privileged UNKNOWN SysTick Current Value Register
+uint32_t * const SYST_CALIB = (uint32_t *)0xE000E01;    // Privileged a SysTick Calibration Value Register
+// Interrupt Control and State Register
+uint32_t * const ICSR = (uint32_t *)0xE000ED04;
 // UART0 data register on this MCU
-unsigned int * const UART0DR = (unsigned int *)0x4000c000;
+uint32_t * const UART0DR = (uint32_t *)0x4000c000;
 
-unsigned int * const CPUID = (unsigned int *)0xE000ED00; // 412FC231
-unsigned int * const STCSR = (unsigned int *)0xE000E010;
-unsigned int * const CCR = (unsigned int *)0xE000ED14;
-
-Thread * currentThread; // not pointer to SP just to TCB - so need dereference
 
 void printChar(unsigned char sym) {
 
@@ -53,14 +50,12 @@ void sysTickInit() {
 extern "C" {
 
 void SysTick_Handler(void) {
+    
+    // timer stop
+    // *SYST_CSR = 0;
 
-    // *SYST_CSR = 0;  // timer stop
-
-    /* Trigger the pendSV */
-    *((uint32_t volatile *)0xE000ED04) = 0x10000000;
-    // 0xE000ED04 represents the address of the System Control Block Register
-    // Interrupt Control and State (INTCTRL) and the value 0x10000000 is
-    // the PENDSVSET bit
+    // Trigger the pendSV
+    *ICSR = 0x10000000; // [28]PENDSVSETRWPendSV set-pending bit.
 }
 
 /* System initialization
@@ -88,12 +83,8 @@ void __START(void) {
     Thread task2([]() { while(1) { printStr("TASK2!\n"); } }, (sizeof thread2Stack)/4, (uint32_t *)&thread2Stack);
     // Thread task3([]() { while(1) { printStr("TASK3!\n"); } }, (sizeof thread3Stack)/4, (uint32_t *)&thread3Stack);
 
-    task1.setNext(&task2);
-    task2.setNext(&task1);
-    // task3.setNext(&task1);  // list should be closed
-
-    currentThread = &task1;
-    //task1.start();
+    Scheduler::addThread(&task1);
+    Scheduler::addThread(&task2);
 
     sysTickInit();
     

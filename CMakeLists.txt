@@ -31,6 +31,7 @@ target_sources(
         startup
     PRIVATE platformInitARMCortexM3/startup.s
     PRIVATE sources/core/contextSwitch.s
+    PRIVATE sources/core/pendSvHandler.s
 )
 set_property(
     TARGET

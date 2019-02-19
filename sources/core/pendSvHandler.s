@@ -28,43 +28,29 @@
                 .fnstart
 PendSV_Handler:
 
-                // need to be in pure Asembler
+                // Can not touch SW frame registers in this procedure
+                // and change stack.
+                // Because saved/restored thread stack frames will be corrupted
+                // or MSP will grow on each procedure run.
 
-                Scheduler::execute();
+                BL      Scheduler::execute
 
-                if (Scheduler::lastDecision == Scheduler::Decision::noAction)
-                    return;
+                LDR     R0, =Scheduler::lastDecision
+                MOV     R1, 0               // Scheduler::Decision::noAction
+                CMP     R0, R1
+                IT      EQ                  // if equal
+                BEQ     .exit
 
-                if (Scheduler::lastDecision == Scheduler::Decision::saveAndRestore) {
+                MOV     R1, 1               // Scheduler::Decision::saveAndRestore
+                CMP     R0, R1
+                ITT     EQ                  // if equal
+                BLEQ    Scheduler::saveContext
+                BLEQ    Scheduler::stepThreadList
 
-                    saveContext((uint32_t*)currentThread);
+                BL      Scheduler::restoreContext
 
-                    currentThread->setState(Thread::State::paused);
-                    currentThread = nextThread;
-                    currentThread->setState(Thread::State::running);
-                }
-
-                restoreContext((uint32_t*)currentThread);
-
-                while (1) { /* here should never get */ }
-
-
-
-                LDR     R1, [R0]            // dereference Thread * to stackTop *
-                LDR     R4, [R1], #4        // Restore software frame
-                LDR     R5, [R1], #4
-                LDR     R6, [R1], #4
-                LDR     R7, [R1], #4
-                LDR     R8, [R1], #4
-                LDR     R9, [R1], #4
-                LDR     R10, [R1], #4
-                LDR     R11, [R1], #4
-                MSR     PSP, R1             // Restore PSP
-
-                // ------------------
-
-                MOV     LR, #0xFFFFFFFD    // Return from exception
-                BX      LR
+.exit:
+                BX      LR                  // Return from exception
 
                 .fnend
                 .end

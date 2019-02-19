@@ -17,6 +17,8 @@
 // using
 #include <stdint.h>
 
+#include "thread.hpp"
+
 /**
  * Class header code-style template.
  * Here put detailed description ...
@@ -38,45 +40,19 @@ public:
         LAST_ELEMENT
     };
 
-    static void execute(void) const;
-
-    static void stepPointers(void) const;
-    // rename this to better ;)
-
-    // ClassTempate(/*args*/);
-    // ClassTempate(const ClassTempate&) = delete;             /**< Delete copy constructor. */
-    // ClassTempate& operator=(const ClassTempate&) = delete;  /**< Delete assignment operator. */
-
-    // void publicFunction(void) const;
+    /**
+     * Add thread to scheduler list tail.
+     * If list is empty - add thread and create self reference in it.
+     */
+    static void addThread(Thread * thread);
 
 private:
 
+    static void takeDecision(void);     /**< Used from ASM context switch procedure */
+    static void stepThreadList(void);   /**< Used from ASM context switch procedure */
+   
+    static Thread * currentThread;      /**< Pointer to current active thread instance */
     static Decision lastDecision;       /**< Last decision of scheduler */
-
-    // void privateFunction(void);
-
-    // /**
-    //  * Private struct or bit-field example
-    //  */
-    // struct PrivateBitField {
-
-    //     uint32_t element1 : 2;
-    //     /**< description of element1 */
-    // };
-
-    // /** Private constant. */ 
-    // const uint32_t constant = 1000;
-
-    // static uint8_t staticAtribute1;     /**< Description. */
-    // static uint8_t staticAtribute2;     /**< Description. */
-    
-    // /**
-    //  * long description
-    //  * of attribute
-    //  */
-    // uint8_t * someAttribute;
-    
-    // PrivateBitField structAtribute;     /**< Attribute. */
     
 };
 

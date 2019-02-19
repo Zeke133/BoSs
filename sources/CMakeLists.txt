@@ -26,4 +26,5 @@ target_sources(
     PRIVATE ${UTILS_DIR}/${SRC_DIR}/convertation
     PRIVATE ${CORE_DIR}/${SRC_DIR}/core
     PRIVATE ${CORE_DIR}/${SRC_DIR}/thread
+    PRIVATE ${CORE_DIR}/${SRC_DIR}/scheduler
 )
