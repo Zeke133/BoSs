@@ -1,7 +1,7 @@
 #ifndef _CONVETRATION_H
 #define _CONVETRATION_H
 
-#include <stdint.h>
+#include <cstdint>
 
 // Convertation of Integers to String representation
 // val - input value

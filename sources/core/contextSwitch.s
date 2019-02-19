@@ -33,7 +33,6 @@
 
 /**
  * @brief  restoreContext implementation for ARM Cortex-M3
- *         void restoreContext(uint32_t * threadStackTop)
  * @param  threadStackTop: passed as function argument in R0
  * @retval 0xFFFFFFFD Thread mode PSP
  */
@@ -84,7 +83,6 @@ restoreContext:
 
 /**
  * @brief  saveContext implementation for ARM Cortex-M3
- *         void saveContext(uint32_t * threadStackTop)
  * @param  threadStackTop: passed as function argument in R0
  * @retval None
  */

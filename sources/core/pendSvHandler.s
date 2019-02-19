@@ -33,21 +33,29 @@ PendSV_Handler:
                 // Because saved/restored thread stack frames will be corrupted
                 // or MSP will grow on each procedure run.
 
-                BL      Scheduler::execute
+                BKPT    #0x23
+                BL      _ZN9Scheduler12takeDecisionEv       // Scheduler::takeDecision()
 
-                LDR     R0, =Scheduler::lastDecision
+                // LDR use just registers, label adress to register?? try
+                LDR     R0, [=_ZN9Scheduler12lastDecisionE]   // Scheduler::lastDecision atribute ??? doesn't work! loads 0x20000000
+
                 MOV     R1, 0               // Scheduler::Decision::noAction
-                CMP     R0, R1
+                CMP     R2, R1
                 IT      EQ                  // if equal
                 BEQ     .exit
 
-                MOV     R1, 1               // Scheduler::Decision::saveAndRestore
-                CMP     R0, R1
-                ITT     EQ                  // if equal
-                BLEQ    Scheduler::saveContext
-                BLEQ    Scheduler::stepThreadList
+                LDR     R0, [=_ZN9Scheduler13currentThreadE]  // Scheduler::currentThread ??? load not relocated address LMA = 0x20000004
 
-                BL      Scheduler::restoreContext
+                MOV     R1, 1               // Scheduler::Decision::onlyRestore
+                CMP     R2, R1
+                IT      EQ
+                BEQ     .restore
+
+                BL      saveContext         // asm procedure
+                BL      _ZN9Scheduler14stepThreadListEv     // Scheduler::stepThreadList()
+
+.restore:
+                BL      restoreContext      // asm procedure
 
 .exit:
                 BX      LR                  // Return from exception

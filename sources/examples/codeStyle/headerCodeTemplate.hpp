@@ -15,7 +15,7 @@
 #define _HEADER_CODE_TEMPLATE_H
 
 // using
-#include <stdint.h>
+#include <cstdint>
 extern "C" {
 //#include <stdint.h>
 }

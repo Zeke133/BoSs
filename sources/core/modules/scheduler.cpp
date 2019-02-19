@@ -34,6 +34,7 @@ void Scheduler::takeDecision() {
             lastDecision = Decision::onlyRestore;
             // current thread was just initialized and never run yet
             // so has no context to save
+            // HAPPENS just on 1st thread!!!???
 
         } else {
 
@@ -110,7 +111,7 @@ void Scheduler::addThread(Thread * thread) {
             threadIterator = threadIterator->getNext();
         }
         // insert new thread to the last posititon
-        thread->setNext(threadIterator->getNext);
+        thread->setNext(threadIterator->getNext());
         threadIterator->setNext(thread);
     }
 }

@@ -15,7 +15,7 @@
 #define _SCHEDULER_H
 
 // using
-#include <stdint.h>
+#include <cstdint>
 
 #include "thread.hpp"
 
