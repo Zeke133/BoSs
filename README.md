@@ -16,3 +16,6 @@ Project of OS core (scheduler) for ARM Cortex M3 microcontrollers with emulation
 - [ ] Context switch procedures profiling
 - [ ] Stack Overflow detection by "endmarks"
 - [ ] Make user treads to run in Unprivileged mode and one thread for kernel tasks. Run user main() from _init. before this go to PSP unprivileged mode.
+- [ ] Unit tests
+- [ ] Thread SLEEP()
+- [ ] Mutex and semafore

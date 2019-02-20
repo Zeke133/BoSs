@@ -33,29 +33,31 @@ PendSV_Handler:
                 // Because saved/restored thread stack frames will be corrupted
                 // or MSP will grow on each procedure run.
 
-                BKPT    #0x23
-                BL      _ZN9Scheduler12takeDecisionEv       // Scheduler::takeDecision()
+                //BKPT    #0x23
+                BL      _ZN9Scheduler12takeDecisionEv       // call Scheduler::takeDecision()
 
-                // LDR use just registers, label adress to register?? try
-                LDR     R0, [=_ZN9Scheduler12lastDecisionE]   // Scheduler::lastDecision atribute ??? doesn't work! loads 0x20000000
+                LDR     R0, =_ZN9Scheduler12lastDecisionE   // load PC-relative address of label to R0
+                LDR     R1, [R0]                            // get value of Scheduler::lastDecision attribute to R1
 
-                MOV     R1, 0               // Scheduler::Decision::noAction
-                CMP     R2, R1
-                IT      EQ                  // if equal
+                MOV     R2, 0               // Scheduler::Decision::noAction
+                CMP     R1, R2
+                IT      EQ                  // if (lastDecision == noAction)
                 BEQ     .exit
 
-                LDR     R0, [=_ZN9Scheduler13currentThreadE]  // Scheduler::currentThread ??? load not relocated address LMA = 0x20000004
+                LDR     R2, =_ZN9Scheduler13currentThreadE  // load PC-relative address of label to R2
+                LDR     R0, [R2]                            // get value of Scheduler::currentThread attribute to R0
 
-                MOV     R1, 1               // Scheduler::Decision::onlyRestore
-                CMP     R2, R1
+                MOV     R2, 1               // Scheduler::Decision::onlyRestore
+                CMP     R1, R2
                 IT      EQ
                 BEQ     .restore
 
-                BL      saveContext         // asm procedure
-                BL      _ZN9Scheduler14stepThreadListEv     // Scheduler::stepThreadList()
+                BL      saveContext         // call procedure, takes address of SP in R0
+                BL      _ZN9Scheduler18pauseCurrentThreadEv // call Scheduler::pauseCurrentThread()
 
 .restore:
-                BL      restoreContext      // asm procedure
+                BL      _ZN9Scheduler16runCurrentThreadEv   // call Scheduler::runCurrentThread()
+                BL      restoreContext      // call procedure, takes address of SP in R0
 
 .exit:
                 BX      LR                  // Return from exception

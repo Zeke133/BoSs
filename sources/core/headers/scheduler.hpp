@@ -49,7 +49,8 @@ public:
 private:
 
     static void takeDecision(void);     /**< Used from ASM context switch procedure */
-    static void stepThreadList(void);   /**< Used from ASM context switch procedure */
+    static void pauseCurrentThread(void);   /**< Used from ASM context switch procedure */
+    static void runCurrentThread(void); /**< Used from ASM context switch procedure */
    
     static Thread * currentThread;      /**< Pointer to current active thread instance */
     static Decision lastDecision;       /**< Last decision of scheduler */

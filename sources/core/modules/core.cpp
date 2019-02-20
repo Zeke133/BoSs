@@ -31,7 +31,7 @@ void printStr(const char *s) {
 void sysTickInit() {
 
     // 1.Program reload value.
-    *SYST_RVR = 0x000ffff;   // 0x00000001-0x00FFFFFF. If the SysTick interrupt is required every 100 clock pulses, set RELOAD to 99.
+    *SYST_RVR = 0x0ffffff;   // 0x00000001-0x00FFFFFF. If the SysTick interrupt is required every 100 clock pulses, set RELOAD to 99.
 
     // 2.Clear current value.
     *SYST_CVR = 0x0;          // A write of any value clears the field to 0, and also clears the SYST_CSR COUNTFLAG bit to 0.
@@ -80,7 +80,7 @@ void __START(void) {
     // thread1Stack[39] = 0xf39;                // here can place MagicInt of stack top
 
     Thread task1([]() { while(1) { printStr("TASK1!\n"); } }, (sizeof thread1Stack)/4, (uint32_t *)&thread1Stack);
-    Thread task2([]() { while(1) { printStr("TASK2!\n"); } }, (sizeof thread2Stack)/4, (uint32_t *)&thread2Stack);
+    Thread task2([]() { while(1) { printStr("task2!\n"); } }, (sizeof thread2Stack)/4, (uint32_t *)&thread2Stack);
     // Thread task3([]() { while(1) { printStr("TASK3!\n"); } }, (sizeof thread3Stack)/4, (uint32_t *)&thread3Stack);
 
     Scheduler::addThread(&task1);

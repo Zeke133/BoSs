@@ -76,10 +76,20 @@ void Scheduler::takeDecision() {
  * 
  * Implicitly change Decision private atribute
  */
-void Scheduler::stepThreadList() {
+void Scheduler::pauseCurrentThread() {
 
     currentThread->setState(Thread::State::paused);
     currentThread = currentThread->getNext();
+}
+
+/**
+ * Some text.
+ * About public method.
+ * 
+ * Implicitly change Decision private atribute
+ */
+void Scheduler::runCurrentThread() {
+
     currentThread->setState(Thread::State::running);
 }
 
