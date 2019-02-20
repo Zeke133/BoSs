@@ -55,7 +55,7 @@ private:
     void setState(State newState) { this->state = newState; };
     State getState() const { return state; }
 
-    uint32_t * stackTop;                /**< must be on first place! */
+    uint32_t * stackTop;                /**< must be on first place! used from asembler */
     Thread * next = nullptr;            /**< next thread in linked list */
     State state;                        /**< current state */
 
