@@ -1,6 +1,5 @@
 #include <cstdint>
 
-// #include "core_cm3.h"
 #include "thread.hpp"
 #include "scheduler.hpp"
 
@@ -49,6 +48,11 @@ void sysTickInit() {
 
 extern "C" {
 
+// void PendSV_Handler(void) {
+    
+//     printStr("\nPendSV_Handler()\n");
+// }
+
 void SysTick_Handler(void) {
     
     // timer stop
@@ -56,6 +60,7 @@ void SysTick_Handler(void) {
 
     // Trigger the pendSV
     *ICSR = 0x10000000; // [28]PENDSVSETRWPendSV set-pending bit.
+    // printStr("\nSysTick_Handler()\n");
 }
 
 /* System initialization
@@ -72,6 +77,14 @@ void __START(void) {
     // nucleus
 
     // priority of interrupts SysTick and PendSV
+
+    // DWT_Init
+    // if (!(CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk)) {
+
+    //     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    //     DWT->CYCCNT = 0;
+    //     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+    // }
 
     volatile uint32_t thread1Stack[40];     // stack for thread 100x4=400 bytes
     volatile uint32_t thread2Stack[30];

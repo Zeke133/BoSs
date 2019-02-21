@@ -18,34 +18,32 @@
 #include <cstdint>
 
 /**
- * Class header code-style template.
- * Here put detailed description ...
- * ...
+ * Class implement thread instance abstraction.
+ * Some parts of code are used from Asembler, so change carefully.
  */
-// template <stackSizeWords>
 class Thread {
 
 friend class Scheduler;
 
 public:
 
-    /** Private constant. */
+    /** Thread task function type */
     typedef void (*task_t)(void);
     /**
-     * Enumeration
+     * Enumeration of thread states
      */
     enum class State : uint8_t {
 
-        initialized = 0,    /// initialized and ready to run
-        paused,             /// 
-        running,            /// 
-
-        LastElement         /// for compile-time out of range check
+        initialized = 0,    /**< thread initialized and ready to run */
+        paused,             /**< thread is waiting */
+        running,            /**< thread is active */
     };
 
     Thread(task_t task, uint32_t stackSizeWords, uint32_t * allocatedStack);
 
-    // join
+    // join()
+    // wait()
+    // kill()
 
 private:
 
@@ -59,7 +57,7 @@ private:
     Thread * next = nullptr;            /**< next thread in linked list */
     State state;                        /**< current state */
 
-    constexpr static uint32_t onReturnProcedurePtr = 0xEEEE; /**< just a MagicInt dummy implementation */
+    constexpr static uint32_t onReturnProc = 333; /**< just a MagicInt dummy implementation */
     
 };
 

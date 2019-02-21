@@ -1,14 +1,12 @@
 cmake_minimum_required (VERSION 3.9)
 
-# Project name
 project(
-    OS_SCHEDULER
+    BOSS            # Bare Operating System Solution
     VERSION 0.1.1
-    DESCRIPTION     "Scheduler for ARM Cortex M3 embadded OS"
+    DESCRIPTION     "ARM Cortex M3 minimal preemptive multitasking OS"
     HOMEPAGE_URL    "https://github.com/Zeke133/osStudy"
     LANGUAGES
-        ASM     # startup procedure
-        C
+        ASM
         CXX
 )
 
@@ -25,17 +23,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # )
 
 # ------------------------------------------------------------
-# Startup procedure
-add_library(startup OBJECT)
+# Hardware dependent modules
+add_library(hardwareModules OBJECT)
 target_sources(
-        startup
-    PRIVATE platformInitARMCortexM3/startup.s
-    PRIVATE sources/core/contextSwitch.s
-    PRIVATE sources/core/pendSvHandler.s
+        hardwareModules
+    PRIVATE sources/kernel/asm/startUp.s
+    PRIVATE sources/kernel/asm/contextSwitch.s
+    PRIVATE sources/kernel/asm/pendSvHandler.s
 )
 set_property(
     TARGET
-        startup
+        hardwareModules
     APPEND
     PROPERTY
         COMPILE_OPTIONS
@@ -83,7 +81,7 @@ set_property(
 # ------------------------------------------------------------
 # Link firmware
 add_executable(os.elf)
-target_link_libraries(os.elf PRIVATE startup modules)
+target_link_libraries(os.elf PRIVATE hardwareModules modules)
 
 set_target_properties(
         os.elf
@@ -93,21 +91,22 @@ set_target_properties(
 
 # ---
 # Link properties
-set(MAP_FILE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin/os.map)
-set(LINKER_SCRIPT_PATH ${PROJECT_SOURCE_DIR}/platformInitARMCortexM3/linkerScript.ld)
-set(USER_LINK_FLAG          "-Map=${MAP_FILE_OUTPUT_PATH} -cref --gc-sections")
-# set(USER_LINK_FLAG          "-Os -g -Map=${MAP_FILE_OUTPUT_PATH} -cref --gc-sections")
-set(PLATFORM_LINK_FLAGS     "")
+set(MAP_FILE_OUTPUT_PATH    ${PROJECT_SOURCE_DIR}/bin/os.map)
+# -cref                     Include Cross Reference Table to .map file
+# --gc-sections             Throw out unused sections from output binary
+# -Map=fileName             Generate .map file
+set(USER_LINK_FLAGS         "-Map=${MAP_FILE_OUTPUT_PATH} -cref --gc-sections")
+set(LINKER_MEMORY_SCRIPT    ${PROJECT_SOURCE_DIR}/sources/kernel/linker/linkerMemoryQemu.ld)
+set(LINKER_SECTIONS_SCRIPT  ${PROJECT_SOURCE_DIR}/sources/kernel/linker/linkerSections.ld)
 # set(PLATFORM_LINK_FLAGS     "-mcpu=cortex-m3 -mthumb")
-set(EMBEDDED_LINK_FLAGS     "")
 # set(EMBEDDED_LINK_FLAGS     "--specs=nano.specs --specs=nosys.specs -nostartfiles")
 # -nostdlib same as passing -nodefaultlibs and -nostartfiles
 set_property(
     TARGET os.elf
     PROPERTY
         LINK_FLAGS
-            "${PLATFORM_LINK_FLAGS}  ${EMBEDDED_LINK_FLAGS} ${USER_LINK_FLAG} -T${LINKER_SCRIPT_PATH}"
             # CMake syntax let flags be defined only in one string
+            "${USER_LINK_FLAGS} -T${LINKER_MEMORY_SCRIPT} -T${LINKER_SECTIONS_SCRIPT}"
 )
 
 # ------------------------------------------------------------

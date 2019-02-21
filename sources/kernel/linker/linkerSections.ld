@@ -1,13 +1,15 @@
 /**
- * @file    linkerScript.ld
+ * @file    linkerSections.ld
  * @author  Denis Homutovski
  * @version V1.0.0
- * @date    02-09-2019
+ * @date    21-09-2019
  * @brief   ARM Cortex-M3 Linker Script
+ * @details   Specify output binary sections.
  * @copyright GNU Public License.
  */
 
-/* Linker script to place sections and symbol values. Should be used together
+/**
+ * Linker script to place sections and symbol values. Should be used together
  * with other linker script that defines memory regions FLASH and RAM.
  * It references following symbols, which must be defined in code:
  *   Reset_Handler : Entry of reset handler
@@ -34,17 +36,6 @@
  *   __stack
  */
 
-/* Configure memory regions. */
-MEMORY
-{
-	ROM (rx)	: ORIGIN = 0x00000000, LENGTH = 128K	/* Flash memory */
-	/* abnormal 0x08000000 on STM32, 0x00000000 on ARM Cortex-M3 */
-	RAM (rwx)	: ORIGIN = 0x20000000, LENGTH = 8K		/* RAM memory */
-	/* 8K on lm3s811evb QEMU and 20k on STM32F103C8T6 */
-}
-
-/* ". = 0x0;" or "ENTRY()" are not needed when MEMORY is defined */
-
 /* Configure output sections. */
 SECTIONS
 {
@@ -52,7 +43,8 @@ SECTIONS
 	.text :
 	{
 		/* ARM needs Vector table to be placed at 0x00000000 */
-		KEEP(*(.vectors))		/* Don't let GC .vector */
+		KEEP(*(.vectors))		/* Don't let linker to throw out .vector section! */
+								/* Otherwise linking with --gc-sections flag will do it. */
 		
 		. = ALIGN(4);			/* Align current address pointer to 4 */
 		*(.text)				/* put here .text sections from all object files */
@@ -120,7 +112,7 @@ SECTIONS
 	 * __data_start__ and __data_end__ will be used to copy data
 	 * from LMA (Load Memory Address) in ROM to VMA (Virtual Memory Address) in RAM
 	 * in startup code */
-	.data : AT (__etext)
+	.data : AT (__etext)	/* _etext set LMA */
 	{
 		__data_start__ = .;
 		*(vtable)			/* check for correct name Vtable */
@@ -195,7 +187,7 @@ SECTIONS
 	/DISCARD/ :
 	{
 		
-		*(.ARM.exidx)		/* this can force to not include ARM exception unwinder */
+		*(.ARM.exidx)	/* this can force to not include ARM exception unwinder */
 		/*
 		libc.a ( * )
 		libm.a ( * )

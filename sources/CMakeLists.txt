@@ -2,29 +2,24 @@
 # Compile OS modules to object file
 # ---
 add_library(modules OBJECT)
-# target_link_libraries(modules PRIVATE startup stm_ll)
 
-set(CORE_DIR            core)
+set(KERNEL_DIR          kernel)
 set(UTILS_DIR           utils)
-set(CODE_STYLE_DIR      examples/codeStyle)
-set(CMSIS_LIB_DIR       ../libs/cmsis/ARMCM3)
+# set(CMSIS_LIB_DIR       ../libs/cmsis/ARMCM3)
 
 set(H_DIR               headers)
 set(SRC_DIR             modules)
 
 target_include_directories(
     modules
-    PRIVATE ${CMSIS_LIB_DIR}
-    PRIVATE ${CODE_STYLE_DIR}
-    PRIVATE ${CORE_DIR}/${H_DIR}
+    # PRIVATE ${CMSIS_LIB_DIR}
+    PRIVATE ${KERNEL_DIR}/${H_DIR}
     PRIVATE ${UTILS_DIR}/${H_DIR}
 )
 
 target_sources(
     modules
-    PRIVATE ${CODE_STYLE_DIR}/sourceCodeTemplate
-    PRIVATE ${UTILS_DIR}/${SRC_DIR}/convertation
-    PRIVATE ${CORE_DIR}/${SRC_DIR}/core
-    PRIVATE ${CORE_DIR}/${SRC_DIR}/thread
-    PRIVATE ${CORE_DIR}/${SRC_DIR}/scheduler
+    PRIVATE ${KERNEL_DIR}/${SRC_DIR}/core
+    PRIVATE ${KERNEL_DIR}/${SRC_DIR}/thread
+    PRIVATE ${KERNEL_DIR}/${SRC_DIR}/scheduler
 )
