@@ -119,11 +119,7 @@ void Scheduler::addThread(Thread * thread) {
     if (currentThread == nullptr) {
 
         currentThread = thread;
-
-        if (currentThread->getNext() == nullptr) {
-            
-            currentThread->setNext(currentThread);
-        }
+        currentThread->setNext(currentThread);
 
     } else {
 

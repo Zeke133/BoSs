@@ -28,7 +28,7 @@ friend class Scheduler;
 public:
 
     /** Thread task function type */
-    typedef void (*task_t)(void);
+    typedef void (*taskType)(void);
     /**
      * Enumeration of thread states
      */
@@ -39,19 +39,20 @@ public:
         running,            /**< thread is active */
     };
 
-    Thread(task_t task, uint32_t stackSizeWords, uint32_t * allocatedStack);
+    Thread(taskType task, uint32_t stackSizeWords, uint32_t * allocatedStack);
 
     // join()
     // wait()
     // kill()
+    
+    uint32_t * getStackTop() const { return stackTop; };
+    State getState() const { return state; };
+    Thread * getNext() const { return this->next; };
 
 private:
 
-    void setNext(Thread * nextThread) { this->next = nextThread; };
-    Thread * getNext() const { return this->next; };
-
     void setState(State newState) { this->state = newState; };
-    State getState() const { return state; }
+    void setNext(Thread * nextThread) { this->next = nextThread; };
 
     uint32_t * stackTop;                /**< must be on first place! used from asembler */
     Thread * next = nullptr;            /**< next thread in linked list */

@@ -1,7 +1,4 @@
-# Sources of project on C++
+# Sources of project
 
-All files are divided to categories:
-
-- startup
-- utils
-
+- **examples** Code style templates
+- **nuclear** Source code of operation system kernel
