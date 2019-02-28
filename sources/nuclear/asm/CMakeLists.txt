@@ -8,4 +8,5 @@ target_sources(
     PRIVATE startUp.s
     PRIVATE contextSwitch.s
     PRIVATE pendSvHandler.s
+    PRIVATE libc.s
 )

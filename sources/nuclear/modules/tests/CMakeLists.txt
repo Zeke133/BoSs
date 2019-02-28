@@ -18,7 +18,7 @@ add_executable(nuclearAbstractModulesTests)
 
 target_link_libraries(
         nuclearAbstractModulesTests
-    PRIVATE ${GOOGLE_TEST_DIR}/googletest/build/gtest_main.a
+    PRIVATE ${GOOGLE_TEST_DIR}/googletest/make/gtest_main.a
 )
 
 target_include_directories(

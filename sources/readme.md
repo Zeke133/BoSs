@@ -1,4 +1,6 @@
 # Sources of project
 
+- **application** User application sources
 - **examples** Code style templates
-- **nuclear** Source code of operation system kernel
+- **framework** Drivers and abstractions for rapid developement
+- **nuclear** Operation system kernel
