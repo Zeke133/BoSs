@@ -16,3 +16,6 @@ build
 *.hex
 *.bin
 *.sym
+
+# MacOS trash
+.DS_Store

@@ -8,7 +8,7 @@ LED::LED(GPIO_TypeDef* port, uint32_t pin)
     LL_GPIO_SetPinSpeed(port, pin, LL_GPIO_SPEED_FREQ_HIGH);
     LL_GPIO_SetPinOutputType(port, pin, LL_GPIO_OUTPUT_PUSHPULL);
     
-    LL_GPIO_ResetOutputPin(port, pin);
+    // LL_GPIO_ResetOutputPin(port, pin);
     state = 1;
 }
 

@@ -64,6 +64,12 @@ void SysTick_Handler(void) {
     // Trigger the pendSV
     *ICSR = 0x10000000; // [28]PENDSVSETRWPendSV set-pending bit.
     // printStr("\nSysTick_Handler()\n");
+    static bool led = true;
+    if (led) {
+        LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_13);
+    } else {
+        LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_13);
+    }
 }
 
 /* System initialization
@@ -95,8 +101,12 @@ void __START(void) {
     // thread1Stack[0] = 0xf00;                 // here can place MagicInt of stack end
     // thread1Stack[39] = 0xf39;                // here can place MagicInt of stack top
 
-    Thread task1([]() { while(1) { printStr("TASK1!\n"); } }, (sizeof thread1Stack)/4, (uint32_t *)&thread1Stack);
-    Thread task2([]() { while(1) { printStr("task2!\n"); } }, (sizeof thread2Stack)/4, (uint32_t *)&thread2Stack);
+    Thread task1([]() { while(1) { LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_13); } },
+                                   (sizeof thread1Stack)/4,
+                                   (uint32_t *)&thread1Stack);
+    Thread task2([]() { while(1) { LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_13); } },
+                                   (sizeof thread2Stack)/4,
+                                   (uint32_t *)&thread2Stack);
     // Thread task3([]() { while(1) { printStr("TASK3!\n"); } }, (sizeof thread3Stack)/4, (uint32_t *)&thread3Stack);
 
     // Scheduler::addThread(&task1);
@@ -106,6 +116,7 @@ void __START(void) {
     LED led(GPIOC, LL_GPIO_PIN_13);
 
     // led.on();
+    LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_13);
 
     sysTickInit();
     
