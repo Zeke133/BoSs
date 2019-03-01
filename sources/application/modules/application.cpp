@@ -3,8 +3,8 @@
 #include "thread.hpp"
 #include "scheduler.hpp"
 
-#include "led.h"
-#include "sysClock.h"
+#include "led.hpp"
+#include "sysClock.hpp"
 
 // SysTick timer
 uint32_t * const SYST_CSR = (uint32_t *)0xE000E010;     // Privileged a SysTick Control and Status Register
@@ -66,16 +66,11 @@ void SysTick_Handler(void) {
     // printStr("\nSysTick_Handler()\n");
 }
 
-/* System initialization
- */
-// void SystemInit(void) {
-
-//     printStr("ARM Cortex-M3 has started up!\n");
-// }
-
 /* Pre-main initialisation
  */
 void __START(void) {
+
+    printStr("ARM Cortex-M3 has started up!\n");
 
     // nucleus
 
@@ -105,7 +100,7 @@ void __START(void) {
     SetSysClockTo72();
     LED led(GPIOC, LL_GPIO_PIN_13);
 
-    // led.on();
+    led.on();
 
     sysTickInit();
     

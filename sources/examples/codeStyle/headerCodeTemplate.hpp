@@ -2,7 +2,7 @@
  * @file    headerCodeTemplate.hpp
  * @author  Denis Homutovski
  * @version V1.0.0
- * @date    12-12-2018
+ * @date    12-12-2019
  * @brief   Class header template.
  * @details   Class header code-style template.
  * @pre       -
@@ -14,11 +14,7 @@
 #ifndef _HEADER_CODE_TEMPLATE_H
 #define _HEADER_CODE_TEMPLATE_H
 
-// using
 #include <cstdint>
-extern "C" {
-//#include <stdint.h>
-}
 
 // IRQ handlers. Extern "C" macro is needed for correct link procedure.
 extern "C" {

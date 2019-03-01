@@ -1,15 +1,28 @@
-#include <gpio.h>
+/**
+ * @file    gpio.cpp
+ * @author  Denis Homutovski
+ * @version V1.0.0
+ * @date    01-03-2019
+ * @brief   GPIO interface implementation
+ * @details   General purpose input/output ports interface
+ * @pre       -
+ * @bug       -
+ * @warning   -
+ * @copyright GNU Public License.
+ */
+
+#include "gpio.hpp"
 
 /**
-  * @brief  Enable APB2 clock for specified port.
-  * @param  port GPIO Port
-  *         GPIOA
-  *         GPIOB
-  *         GPIOC
-  *         GPIOD
-  *         GPIOE
-  * @retval None
-  */
+ * @brief  Enable APB2 clock for specified port.
+ * @param  port GPIO Port
+ *         GPIOA
+ *         GPIOB
+ *         GPIOC
+ *         GPIOD
+ *         GPIOE
+ * @retval None
+ */
 void GPIO::enableAPB2Clock(GPIO_TypeDef * port) {
 
     uint32_t APB2_Periph;

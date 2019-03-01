@@ -2,7 +2,7 @@
  * @file    scheduler.hpp
  * @author  Denis Homutovski
  * @version V1.0.1
- * @date    21-02-2018
+ * @date    21-02-2019
  * @brief   Scheduler class
  * @details   Implementation of threads scheduling algorithm
  * @pre       -
@@ -14,7 +14,6 @@
 #ifndef _SCHEDULER_H
 #define _SCHEDULER_H
 
-// using
 #include <cstdint>
 
 #include "thread.hpp"

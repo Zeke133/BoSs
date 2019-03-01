@@ -1,26 +1,27 @@
-#include <sysClock.h>
+/**
+ * @file    sysClock.hpp
+ * @author  Denis Homutovski
+ * @version V1.0.0
+ * @date    01-03-2019
+ * @brief   System clock initialization API
+ * @details   System clock initialization API implementation
+ * @pre       -
+ * @bug       -
+ * @warning   -
+ * @copyright GNU Public License.
+ */
 
-void SetSysClockTo72(void) {
+#include "sysClock.hpp"
 
-    // de-initialization ??? needed? mabe no
-
-    LL_RCC_HSI_Enable();                /* Set HSION bit */
-    while(LL_RCC_HSI_IsReady() != 1U);  /* Wait for HSI READY bit */
-
-    LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_HSI);   /* Configure HSI as system clock source */
-    while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_HSI);    /* Wait till clock switch is ready */
-
-
-    CLEAR_BIT(RCC->CR, RCC_CR_PLLON);   /* Reset PLLON bit */
-    while(LL_RCC_PLL_IsReady() != 0U);  /* Wait for PLL READY bit to be reset */
-
-    LL_RCC_WriteReg(CFGR, 0x00000000U); /* Reset CFGR register */
-    CLEAR_BIT(RCC->CR, (RCC_CR_CSSON | RCC_CR_HSEON | RCC_CR_HSEBYP));  /* Reset HSEON, HSEBYP & CSSON bits */
-    LL_RCC_HSI_SetCalibTrimming(0x10U); /* Set HSITRIM bits to the reset value */
-    LL_RCC_WriteReg(CIR, 0x00000000U);  /* Disable all interrupts */
-    LL_RCC_ClearResetFlags();   /* Clear reset flags */
-
-    //------------------------------------------------------
+/**
+ * @brief  LED class constructor
+ *         Initialize APB2 clock and setup port.
+ *         Set LED ON
+ * @param  port GPIO Port
+ * @param  pin to be used
+ * @retval None
+ */
+void SystemClock::setClockTo72Mhz(void) {
 
     LL_RCC_HSE_DisableBypass();
     LL_RCC_HSE_Enable();

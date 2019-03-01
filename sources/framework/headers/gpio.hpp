@@ -1,15 +1,32 @@
+/**
+ * @file    gpio.hpp
+ * @author  Denis Homutovski
+ * @version V1.0.0
+ * @date    01-03-2019
+ * @brief   GPIO interface
+ * @details   General purpose input/output ports interface
+ * @pre       -
+ * @bug       -
+ * @warning   -
+ * @copyright GNU Public License.
+ */
+
 #ifndef _GPIO_H
 #define _GPIO_H
 
 #include <stm32f1xx_ll_bus.h>
 #include <stm32f1xx_ll_gpio.h>
 
-/*
-API for general purpose IO port setup
-*/
+/**
+ * API for general purpose IO ports usage
+ */
 namespace GPIO {
 
+void enableAPB2Clock(GPIO_TypeDef * port);
+
 /**
+ * GPIO Ports working modes
+ * ---
  * CNFy[1:0] MODEy[1:0] ... CNF0[1:0] MODE0[1:0]
  * ---
  * CNFy[1:0]: Port x configuration bits (y= 0 .. 7)
@@ -38,27 +55,27 @@ namespace GPIO {
 
 
 /**
-  * @brief  Configure gpio mode for a dedicated pin on dedicated port.
-  * @note   I/O mode can be Analog, Floating input, Input with pull-up/pull-down, General purpose Output,
-  *         Alternate function Output.
-  * @note   Warning: only one pin can be passed as parameter.
-  * @rmtoll CRL        CNFy         LL_GPIO_SetPinMode
-  * @rmtoll CRL        MODEy        LL_GPIO_SetPinMode
-  * @rmtoll CRH        CNFy         LL_GPIO_SetPinMode
-  * @rmtoll CRH        MODEy        LL_GPIO_SetPinMode
-  * @param  GPIOx GPIO Port
-  * @param  Pin This parameter can be one of the following values:
-  *         @arg @ref LL_GPIO_PIN_0
-  *                   ...
-  *         @arg @ref LL_GPIO_PIN_15
-  * @param  Mode This parameter can be one of the following values:
-  *         @arg @ref LL_GPIO_MODE_ANALOG
-  *         @arg @ref LL_GPIO_MODE_FLOATING
-  *         @arg @ref LL_GPIO_MODE_INPUT
-  *         @arg @ref LL_GPIO_MODE_OUTPUT
-  *         @arg @ref LL_GPIO_MODE_ALTERNATE
-  * @retval None
-  */
+ * @brief  Configure gpio mode for a dedicated pin on dedicated port.
+ * @note   I/O mode can be Analog, Floating input, Input with pull-up/pull-down, General purpose Output,
+ *         Alternate function Output.
+ * @note   Warning: only one pin can be passed as parameter.
+ * @rmtoll CRL        CNFy         LL_GPIO_SetPinMode
+ * @rmtoll CRL        MODEy        LL_GPIO_SetPinMode
+ * @rmtoll CRH        CNFy         LL_GPIO_SetPinMode
+ * @rmtoll CRH        MODEy        LL_GPIO_SetPinMode
+ * @param  GPIOx GPIO Port
+ * @param  Pin This parameter can be one of the following values:
+ *         @arg @ref LL_GPIO_PIN_0
+ *                   ...
+ *         @arg @ref LL_GPIO_PIN_15
+ * @param  Mode This parameter can be one of the following values:
+ *         @arg @ref LL_GPIO_MODE_ANALOG
+ *         @arg @ref LL_GPIO_MODE_FLOATING
+ *         @arg @ref LL_GPIO_MODE_INPUT
+ *         @arg @ref LL_GPIO_MODE_OUTPUT
+ *         @arg @ref LL_GPIO_MODE_ALTERNATE
+ * @retval None
+ */
 // try to make constexpr
 // void initPin(GPIO_TypeDef * GPIOx, uint32_t pin, uint32_t mode, uint32_t speed = LL_GPIO_SPEED_FREQ_HIGH) {
 
@@ -77,10 +94,6 @@ namespace GPIO {
 //         LL_GPIO_SetPinOutputType(GPIOx, pin, GPIO_InitStruct->OutputType);
 //     }
 // };
-
-
-void enableAPB2Clock(GPIO_TypeDef * port);
-
 
 // Lock pin mech() - will help for instanses created once on start of programm
 

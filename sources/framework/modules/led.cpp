@@ -1,5 +1,26 @@
-#include <led.h>
+/**
+ * @file    led.hpp
+ * @author  Denis Homutovski
+ * @version V1.0.0
+ * @date    01-03-2019
+ * @brief   LED class
+ * @details   LED class implementation
+ * @pre       -
+ * @bug       -
+ * @warning   -
+ * @copyright GNU Public License.
+ */
 
+#include "led.hpp"
+
+/**
+ * @brief  LED class constructor
+ *         Initialize APB2 clock and setup port.
+ *         Set LED ON
+ * @param  port GPIO Port
+ * @param  pin to be used
+ * @retval None
+ */
 LED::LED(GPIO_TypeDef* port, uint32_t pin)
     : port(port), pin(pin) {
 
@@ -9,22 +30,23 @@ LED::LED(GPIO_TypeDef* port, uint32_t pin)
     LL_GPIO_SetPinOutputType(port, pin, LL_GPIO_OUTPUT_PUSHPULL);
     
     LL_GPIO_ResetOutputPin(port, pin);
-    state = 1;
+    state = State::ON;
 }
 
 inline void LED::on() {
 
     LL_GPIO_ResetOutputPin(port, pin);
-    state = 1;
+    state = State::ON;
 }
 
 inline void LED::off() {
 
     LL_GPIO_SetOutputPin(port, pin);
-    state = 0;
+    state = State::OFF;
 }
 
 void LED::invert() {
 
-    state ? off() : on();
+    if(state == State::ON) off();
+    else on();
 }

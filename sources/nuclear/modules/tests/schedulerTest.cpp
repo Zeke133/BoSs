@@ -2,7 +2,7 @@
  * @file    schedulerTest.cpp
  * @author  Denis Homutovski
  * @version V1.0.0
- * @date    23-12-2018
+ * @date    23-12-2019
  * @brief   Scheduler class tests
  * @details   Unit tests
  * @pre       -

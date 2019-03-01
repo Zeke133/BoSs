@@ -2,7 +2,7 @@
  * @file    threadTest.cpp
  * @author  Denis Homutovski
  * @version V1.0.0
- * @date    22-12-2018
+ * @date    22-12-2019
  * @brief   Thread class tests
  * @details   Unit tests
  * @pre       -

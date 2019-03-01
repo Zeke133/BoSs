@@ -2,7 +2,7 @@
  * @file    thread.hpp
  * @author  Denis Homutovski
  * @version V1.0.0
- * @date    19-12-2018
+ * @date    19-12-2019
  * @brief   Thread class
  * @details   Implementation of thread instance
  * @pre       -
@@ -14,7 +14,6 @@
 #ifndef _THREAD_H
 #define _THREAD_H
 
-// using
 #include <cstdint>
 
 /**

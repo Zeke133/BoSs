@@ -2,7 +2,7 @@
  * @file    sourceCodeTemplate.cpp
  * @author  Denis Homutovski
  * @version V1.0.0
- * @date    12-12-2018
+ * @date    12-12-2019
  * @brief   Class source template.
  * @details   Class header code-style template.
  * @pre       -

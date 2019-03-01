@@ -2,7 +2,7 @@
  * @file    thread.cpp
  * @author  Denis Homutovski
  * @version V1.0.0
- * @date    18-02-2018
+ * @date    18-02-2019
  * @brief   Thread class
  * @details   Implementation of thread instance
  * @pre       -
