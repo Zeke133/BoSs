@@ -6,6 +6,6 @@ openocd\
     -f target/stm32f1x.cfg\
 	-c init\
 	-c "reset init"\
-	-c "flash write_image erase bin/app.hex"\
+	-c "flash write_image erase bin/boss.hex"\
 	-c reset\
 	-c shutdown
