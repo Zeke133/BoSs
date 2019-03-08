@@ -63,20 +63,14 @@ void SysTick_Handler(void) {
 
     // Trigger the pendSV
     *ICSR = 0x10000000; // [28]PENDSVSETRWPendSV set-pending bit.
-    // printStr("\nSysTick_Handler()\n");
-    static bool led = true;
-    if (led) {
-        LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_13);
-    } else {
-        LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_13);
-    }
+
 }
 
 /* Pre-main initialisation
  */
 void __START(void) {
 
-    printStr("ARM Cortex-M3 has started up!\n");
+    // printStr("ARM Cortex-M3 has started up!\n");
 
     // nucleus
 
@@ -104,16 +98,27 @@ void __START(void) {
                                    (uint32_t *)&thread2Stack);
     // Thread task3([]() { while(1) { printStr("TASK3!\n"); } }, (sizeof thread3Stack)/4, (uint32_t *)&thread3Stack);
 
-    // Scheduler::addThread(&task1);
-    // Scheduler::addThread(&task2);
+    Scheduler::addThread(&task1);
+    Scheduler::addThread(&task2);
 
-    SetSysClockTo72();
+    SystemClock::setClockTo72Mhz();
     LED led(GPIOC, LL_GPIO_PIN_13);
 
     led.on();
 
     sysTickInit();
+
+    // DWT_Init
+    // if (!(CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk)) {
+
+        CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+        DWT->CYCCNT = 0;
+        DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+    // }
+
+    // DWT->CYCCNT;
     
+    // switch to unprivileged and sleep? - or trigger ContextSwitch imideatly
     while(1) ;
 }
 

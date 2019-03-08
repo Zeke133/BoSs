@@ -39,40 +39,38 @@ PendSV_Handler:
 
                 /* Here the procedure names definitions linked from C++ code class Scheduler */
                 .equ    takeDecision,       _ZN9Scheduler12takeDecisionEv
-                .equ    getCurrentThread,   _ZN9Scheduler16getCurrentThreadEv
                 .equ    pauseCurrentThread, _ZN9Scheduler18pauseCurrentThreadEv
-                .equ    runCurrentThread,   _ZN9Scheduler16runCurrentThreadEv
+                .equ    runNextThread,      _ZN9Scheduler13runNextThreadEv
 
-                BL      takeDecision    /**< call Scheduler::takeDecision() */
-                /**
-                 * R0 will contain procedure return value
-                 * enum class Decision : uint8_t
-                 *      noAction = 0
-                 *      onlyRestore = 1
-                 *      saveAndRestore = 2
-                 */
+                BL      takeDecision        /**< call Scheduler::takeDecision() */
+                                            /**
+                                            * R0 will contain procedure return value
+                                            * enum class Decision : uint8_t
+                                            *      noAction = 0
+                                            *      onlyRestore = 1
+                                            *      saveAndRestore = 2
+                                            */
 
-                CBZ     R0, .exit   /**< Compare and Branch on Zero */
-                                    /**< jump to '.exit' if decision is noAction */
+                CBZ     R0, .exit           /**< Compare and Branch on Zero */
+                                            /**< jump to '.exit' if decision is noAction */
 
-                SUB     R0, #1          /**< if R0 == 1, it will be 0 now */
-                CBZ     R0, .restore    /**< jump to '.restore' if decision is onlyRestore */
+                SUB     R0, #1              /**< if R0 == 1, it will be 0 now */
+                CBZ     R0, .restore        /**< jump to '.restore' if decision is onlyRestore */
 
-                BL      getCurrentThread    /**< call Scheduler::getCurrentThread() */
-                /** 
-                 * R0 will contain previous procedure return value (Thread *)
-                 * which is used as input argument to next procedure
-                 */
-                BL      SaveContext         /**< call procedure: takes address of SP in R0! */
                 BL      pauseCurrentThread  /**< call Scheduler::pauseCurrentThread() */
+                                            /** 
+                                            * R0 will contain return value (Thread *)
+                                            * which is used as input argument to next procedure
+                                            */
+                BL      SaveContext         /**< call procedure: takes address of SP in R0! */
 
 .restore:
-                BL      runCurrentThread    /**< call Scheduler::runCurrentThread() */
-                BL      getCurrentThread    /**< get */
+                BL      runNextThread       /**< call Scheduler::runNextThread() return Thread* in R0 */
                 B       RestoreContext      /**< call procedure: takes address of SP in R0! */
-
+                                            /**< Return from exception handler to new thread */
 .exit:
-                BX      LR  /**< Return from exception without context switch */
+                MOV     LR, #0xFFFFFFF9     /**< Return from exception handler to Thread MSP */
+                BX      LR                  /**< without context switch */
 
                 .fnend
                 .end

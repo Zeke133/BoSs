@@ -43,28 +43,32 @@ namespace BossKernelUnitTests {
 
         protected:
 
-        ThreadTest() : stack(16, 666) {};
+        ThreadTest() :
+            task([](){ std::cout << "Dummy task"; }),
+            stack(16, 666),
+            taskRawPointer(task.target<void(*)(void)>()),
+            thread((Thread::taskType)taskRawPointer, stack.size(), stack.data()) {
+
+        };
 
         std::vector<uint32_t> stack;
+        std::function<void(void)> task;
+        Thread::taskType* taskRawPointer;
+        Thread thread;
     };
 
     TEST_F(ThreadTest, StateInitialization) {
         
-        Thread thread((Thread::taskType)0x1234, stack.size(), stack.data());
-
         EXPECT_EQ(thread.getState(), Thread::State::initialized);
     }
     
     TEST_F(ThreadTest, LinkToNextInitialization) {
-        
-        Thread thread((Thread::taskType)0x1234, stack.size(), stack.data());
 
         EXPECT_EQ(thread.getNext(), nullptr);
     }
     
     TEST_F(ThreadTest, TopOfStackAccess) {
 
-        Thread thread((Thread::taskType)0x12345678, stack.size(), stack.data());
         auto stackTopPtr = thread.getStackTop();
 
         auto stackTop = std::end(stack);
@@ -76,16 +80,47 @@ namespace BossKernelUnitTests {
 
     TEST_F(ThreadTest, StackFrameInitialization) {
 
-        Thread thread((Thread::taskType)0x12345678, stack.size(), stack.data());
-
         auto stackTop = std::end(stack);
         uint32_t xpsr = *--stackTop;
         uint32_t pc = *--stackTop;
         uint32_t lr = *--stackTop;
 
         EXPECT_EQ(xpsr, 0x21000000);
-        ASSERT_EQ(pc, 0x12345678);
+        auto taskRawPointer = task.target<void(*)(void)>();
+        ASSERT_EQ(pc, reinterpret_cast<uintptr_t>(taskRawPointer));
         EXPECT_EQ(lr, 333);
+    }
+
+    TEST_F(ThreadTest, SleepTicksInitialization) {
+
+        EXPECT_EQ(thread.getSleepTicks(), 0);
+    }
+    
+    TEST_F(ThreadTest, SetSleepTicks) {
+        
+        thread.setSleepTicks(159357);
+        EXPECT_EQ(thread.getSleepTicks(), 159357);
+        thread.setSleepTicks(0);
+        EXPECT_EQ(thread.getSleepTicks(), 0);
+    }
+
+    TEST_F(ThreadTest, SetNext) {
+
+        Thread * nextThread = (Thread *)0x987654321;
+        
+        thread.setNext(nextThread);
+
+        EXPECT_EQ(thread.getNext(), (Thread *)0x987654321);
+    }
+
+    TEST_F(ThreadTest, SetState) {
+        
+        thread.setState(Thread::State::paused);
+        EXPECT_EQ(thread.getState(), Thread::State::paused);
+        thread.setState(Thread::State::running);
+        EXPECT_EQ(thread.getState(), Thread::State::running);
+        thread.setState(Thread::State::initialized);
+        EXPECT_EQ(thread.getState(), Thread::State::initialized);
     }
 
 } /**< namespace UnitTests */

@@ -1,11 +1,1 @@
-openocd\
-	-s ../share/openocd/scripts\
-    -c "adapter_khz 3000"\
-    -f interface/stlink-v2.cfg\
-    -c "transport select hla_swd"\
-    -f target/stm32f1x.cfg\
-	-c init\
-	-c "reset init"\
-	-c "flash write_image erase bin/boss.hex"\
-	-c reset\
-	-c shutdown
+../OpenOCD/bin/openocd.exe -s ../share/openocd/scripts -c "adapter_khz 3000" -f interface/stlink-v2.cfg -c "transport select hla_swd" -f target/stm32f1x.cfg -c init -c "reset init" -c "flash write_image erase bin/boss.hex" -c reset -c shutdown

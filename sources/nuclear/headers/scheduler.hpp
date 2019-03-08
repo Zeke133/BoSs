@@ -50,10 +50,11 @@ public:
 
 private:
 
-    static void pauseCurrentThread(void);   /**< Used from ASM context switch procedure */
-    static void runCurrentThread(void);     /**< Used from ASM context switch procedure */
-   
+    static Thread * pauseCurrentThread(void);   /**< Used from ASM context switch procedure */
+    static Thread * runNextThread(void);        /**< Used from ASM context switch procedure */
+
     static Thread * currentThread;      /**< Pointer to current active thread instance */
+    static Thread * nextThread;         /**< Pointer to next thread to be executed */
     static Decision lastDecision;       /**< Last decision of scheduler */
     
 };

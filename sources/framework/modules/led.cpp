@@ -33,13 +33,13 @@ LED::LED(GPIO_TypeDef* port, uint32_t pin)
     state = State::ON;
 }
 
-inline void LED::on() {
+void LED::on() {
 
     LL_GPIO_ResetOutputPin(port, pin);
     state = State::ON;
 }
 
-inline void LED::off() {
+void LED::off() {
 
     LL_GPIO_SetOutputPin(port, pin);
     state = State::OFF;

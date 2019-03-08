@@ -13,13 +13,15 @@ Project of OS core (scheduler) for ARM Cortex-M3 microcontrollers with emulation
 - [x] Check if threads run
 - [x] Create PendingSV handler on ASM - problem that C++ handler procedure saves some registers on stack each run
 - [x] **Unit tests**
-- [ ] two configs for QEMU and for REAL HW
-- [ ] reafact added files. create few target configurations for qemuDebug and realHW
-- [ ] target for CMSIS, and chose correct startup procedures
+- [x] two configs for QEMU and for REAL HW
+- [x] reafact added files. create few target configurations for qemuDebug and realHW
+- [x] target for CMSIS, and **chose correct startup** procedures
 - [ ] target for libC or not? use standart libC and exceptions?
-- [ ] **real hardware start**
-- [ ] qemu DWT?
-- [ ] Context switch procedures profiling
+- [x] **real hardware start**
+- [x] ~~qemu DWT not implemented?~~
+- [x] Context switch procedures profiling. Use DWT
+- [ ] #pragma once use and delete uint32_t where is not needed
+- [ ] lambda use
 - [ ] Change to PSP and **unprivileged mode** check if works
 - [ ] Make user treads to run in Unprivileged mode and one thread for kernel tasks. Run user main() from _init. before this go to PSP unprivileged mode.
 - [ ] **Scheduler must also set nextThread pointer**

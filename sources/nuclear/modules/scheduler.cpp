@@ -14,6 +14,7 @@
 #include "scheduler.hpp"
 
 Thread * Scheduler::currentThread = nullptr;
+Thread * Scheduler::nextThread = nullptr;
 Scheduler::Decision Scheduler::lastDecision = Scheduler::Decision::noAction;
 
 /**
@@ -32,14 +33,15 @@ Scheduler::Decision Scheduler::takeDecision() {
              * so there is no need in context saving.
              * Must happen just once for 1st thread on system start. ???
              */
+            nextThread = currentThread;
             return Decision::onlyRestore;
 
         } else {
 
-            Thread * nextThread;
-            while ( (nextThread = currentThread->getNext()) ) {
+            Thread * next;
+            while ( (next = currentThread->getNext()) ) {
 
-                if (nextThread == nullptr) {
+                if (next == nullptr) {
 
                     /**
                      * Need to crash or do nothing ???
@@ -47,12 +49,13 @@ Scheduler::Decision Scheduler::takeDecision() {
                     return Decision::noAction;
                 }
 
-                auto nextThreadState = nextThread->getState();
+                auto nextState = next->getState();
 
-                switch (nextThreadState)
+                switch (nextState)
                 {
                     case Thread::State::initialized:
                         /* Next thread run 1st time */
+                        nextThread = next;
                         return Decision::saveAndRestore;
 
                     case Thread::State::paused:
@@ -62,6 +65,7 @@ Scheduler::Decision Scheduler::takeDecision() {
                          * than next thread will be checked
                          * need to set pointer to nextThread to execute !!!???
                          */
+                        nextThread = next;
                         return Decision::saveAndRestore;
                     
                     case Thread::State::running:
@@ -79,7 +83,9 @@ Scheduler::Decision Scheduler::takeDecision() {
 }
 
 /**
- * Get pointer to current active thread instance
+ * @brief  Get pointer to current active thread instance
+ * @param  None
+ * @retval Thread * - current thread pointer
  */
 Thread * Scheduler::getCurrentThread() {
 
@@ -87,26 +93,36 @@ Thread * Scheduler::getCurrentThread() {
 }
 
 /**
- * Set current active thread to Thread::State::paused
- * and step to next thread in list
+ * @brief  Set current active thread to Thread::State::paused
+ * @param  None
+ * @retval Thread * - current thread pointer
  */
-void Scheduler::pauseCurrentThread() {
+Thread * Scheduler::pauseCurrentThread() {
 
     currentThread->setState(Thread::State::paused);
-    currentThread = currentThread->getNext();
+    return currentThread;
 }
 
 /**
- * Set current active thread to Thread::State::running
+ * @brief  Step to next thread in list and
+ *         set thread state to Thread::State::running
+ * @param  None
+ * @retval Thread * - current thread pointer
  */
-void Scheduler::runCurrentThread() {
+Thread * Scheduler::runNextThread() {
 
+    currentThread = nextThread;
     currentThread->setState(Thread::State::running);
+    return currentThread;
 }
 
 /**
- * Add thread to scheduler list tail.
- * If list is empty - add thread and create self reference in it.
+ * 
+ * 
+ * @brief  Add thread to scheduler list tail.
+ *         If list is empty - add thread and create self reference in it.
+ * @param  Thread * - thread to add
+ * @retval None
  */
 void Scheduler::addThread(Thread * thread) {
 

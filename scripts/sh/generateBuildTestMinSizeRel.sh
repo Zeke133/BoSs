@@ -1,1 +1,0 @@
-ctest --build-and-test . build --build-generator "Unix Makefiles" --build-options -DCMAKE_BUILD_TYPE=MINSIZEREL -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake --test-command ctest -j 4

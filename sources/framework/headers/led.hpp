@@ -43,11 +43,10 @@ private:
     enum struct State {
         OFF,
         ON
-    };
+    } state;
 
     GPIO_TypeDef* port;
     uint32_t pin;
-    State state;
 
 };
 
