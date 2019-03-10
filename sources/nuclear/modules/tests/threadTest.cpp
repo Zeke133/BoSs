@@ -46,14 +46,11 @@ namespace BossKernelUnitTests {
         ThreadTest() :
             task([](){ std::cout << "Dummy task"; }),
             stack(16, 666),
-            taskRawPointer(task.target<void(*)(void)>()),
-            thread((Thread::taskType)taskRawPointer, stack.size(), stack.data()) {
-
+            thread(task, stack.size(), stack.data()) {
         };
 
         std::vector<uint32_t> stack;
         std::function<void(void)> task;
-        Thread::taskType* taskRawPointer;
         Thread thread;
     };
 
@@ -80,13 +77,14 @@ namespace BossKernelUnitTests {
 
     TEST_F(ThreadTest, StackFrameInitialization) {
 
+        auto taskRawPointer = task.target<void(*)(void)>();
         auto stackTop = std::end(stack);
+
         uint32_t xpsr = *--stackTop;
         uint32_t pc = *--stackTop;
         uint32_t lr = *--stackTop;
 
         EXPECT_EQ(xpsr, 0x21000000);
-        auto taskRawPointer = task.target<void(*)(void)>();
         ASSERT_EQ(pc, reinterpret_cast<uintptr_t>(taskRawPointer));
         EXPECT_EQ(lr, 333);
     }

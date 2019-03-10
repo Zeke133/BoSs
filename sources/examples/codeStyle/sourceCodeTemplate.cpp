@@ -1,8 +1,8 @@
 /**
  * @file    sourceCodeTemplate.cpp
  * @author  Denis Homutovski
- * @version V1.0.0
- * @date    12-12-2019
+ * @version V1.0.1
+ * @date    10-03-2019
  * @brief   Class source template.
  * @details   Class header code-style template.
  * @pre       -
@@ -11,7 +11,7 @@
  * @copyright GNU Public License.
  */
 
-#include <headerCodeTemplate.hpp>
+#include "headerCodeTemplate.hpp"
 
 /**@{*/
 /** Grouped description. */

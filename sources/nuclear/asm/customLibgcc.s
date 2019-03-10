@@ -1,11 +1,11 @@
 /**
- * @file    libc.s
+ * @file    customLibgcc.s
  * @author  Denis Homutovski
  * @version V1.0.0
  * @date    27-02-2019
- * @brief   Standart C library functions.
+ * @brief   GCC's Builtin Functions
  * @details   ARM Cortex-M3.
- *            Some libc functions needed in project.
+ *            Some libgcc functions custom impementations needed in project.
  * @pre       -
  * @bug       -
  * @warning   -

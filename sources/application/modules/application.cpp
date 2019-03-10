@@ -1,4 +1,17 @@
-#include <cstdint>
+/**
+ * @file    application.cpp
+ * @author  Denis Homutovski
+ * @version V1.0.0
+ * @date    10-03-2019
+ * @brief   Application class
+ * @details   Implementation of application
+ * @pre       -
+ * @bug       -
+ * @warning   -
+ * @copyright GNU Public License.
+ */
+
+#include "application.hpp"
 
 #include "thread.hpp"
 #include "scheduler.hpp"
@@ -51,11 +64,6 @@ void sysTickInit() {
 
 extern "C" {
 
-// void PendSV_Handler(void) {
-    
-//     printStr("\nPendSV_Handler()\n");
-// }
-
 void SysTick_Handler(void) {
     
     // timer stop
@@ -68,55 +76,56 @@ void SysTick_Handler(void) {
 
 /* Pre-main initialisation
  */
+#ifdef QEMU_DUMMY
+void SystemInit(void) {
+    printStr("ARM Cortex-M3 has started up!\n");
+}
+#endif
 void __START(void) {
-
-    // printStr("ARM Cortex-M3 has started up!\n");
 
     // nucleus
 
     // priority of interrupts SysTick and PendSV
 
-    // DWT_Init
-    // if (!(CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk)) {
-
-    //     CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-    //     DWT->CYCCNT = 0;
-    //     DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-    // }
-
     volatile uint32_t thread1Stack[40];     // stack for thread 100x4=400 bytes
     volatile uint32_t thread2Stack[30];
-    // volatile uint32_t thread3Stack[20];
-    // thread1Stack[0] = 0xf00;                 // here can place MagicInt of stack end
-    // thread1Stack[39] = 0xf39;                // here can place MagicInt of stack top
+    volatile uint32_t thread3Stack[33];
 
-    Thread task1([]() { while(1) { LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_13); } },
-                                   (sizeof thread1Stack)/4,
-                                   (uint32_t *)&thread1Stack);
-    Thread task2([]() { while(1) { LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_13); } },
-                                   (sizeof thread2Stack)/4,
-                                   (uint32_t *)&thread2Stack);
-    // Thread task3([]() { while(1) { printStr("TASK3!\n"); } }, (sizeof thread3Stack)/4, (uint32_t *)&thread3Stack);
+    const auto& task1 = []() {
+        while(1) { 
+        #ifdef QEMU_DUMMY
+            printStr("TASK1\n");
+        #else
+            LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_13);
+        #endif
+        }
+    };
+    const auto& task2 = []() {
+        while(1) { 
+        #ifdef QEMU_DUMMY
+            printStr("task2\n");
+        #else
+            LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_13);
+        #endif
+        }
+    };
 
-    Scheduler::addThread(&task1);
-    Scheduler::addThread(&task2);
+    Thread thread1(task1, (sizeof thread1Stack)/4, (uint32_t *)&thread1Stack);
+    Thread thread2(task2, (sizeof thread2Stack)/4, (uint32_t *)&thread2Stack);
+    Thread thread3(task2, (sizeof thread3Stack)/4, (uint32_t *)&thread3Stack);
 
+    Scheduler::addThread(&thread1);
+    Scheduler::addThread(&thread2);
+    // Scheduler::addThread(&thread3);
+
+    #ifndef QEMU_DUMMY
     SystemClock::setClockTo72Mhz();
-    LED led(GPIOC, LL_GPIO_PIN_13);
+    #endif
 
+    LED led(GPIOC, LL_GPIO_PIN_13);
     led.on();
 
     sysTickInit();
-
-    // DWT_Init
-    // if (!(CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk)) {
-
-        CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-        DWT->CYCCNT = 0;
-        DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-    // }
-
-    // DWT->CYCCNT;
     
     // switch to unprivileged and sleep? - or trigger ContextSwitch imideatly
     while(1) ;

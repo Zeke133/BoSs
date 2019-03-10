@@ -1,10 +1,10 @@
 /**
- * @file    linkerSections.ld
+ * @file    linkerSectionsNoExc.ld
  * @author  Denis Homutovski
  * @version V1.0.1
  * @date    10-03-2019
  * @brief   ARM Cortex-M3 Linker Script
- * @details   Specify output binary sections.
+ * @details   Specify output binary sections. Discard Cpp Exception sections.
  * @copyright GNU Public License.
  */
 
@@ -85,7 +85,7 @@ SECTIONS
 		*/
 	} > ROM
 	
-	/* Exceptions unwind info. Comment if no any standart library is used! */
+	/* Exceptions unwind info. Comment if no any standart library is used!
 	.ARM.extab :
 	{
 		*(.ARM.extab* .gnu.linkonce.armextab.*)
@@ -96,6 +96,7 @@ SECTIONS
 		*(.ARM.exidx* .gnu.linkonce.armexidx.*)
 	} > ROM
 	__exidx_end = .;
+	 */
 	
     /* Constant data to .rodata section */
     .rodata :
@@ -180,4 +181,16 @@ SECTIONS
 
 	/* Check if data + heap + stack exceeds RAM limit */
 	ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
+
+	/* Remove information from the standard libraries */
+	/DISCARD/ :
+	{
+		
+		*(.ARM.exidx)	/* this can force to not include ARM exception unwinder */
+		/*
+		libc.a ( * )
+		libm.a ( * )
+		libgcc.a ( * )
+		*/
+	}
 }

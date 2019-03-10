@@ -18,6 +18,13 @@ set_property(
 )
 
 # Compile options common for C and C++ targets
+if(NOT use_libg)
+    set(COMPILE_DEFINES NO_USE_LIBG)
+endif()
+if(use_qemu_dummies)
+    set(COMPILE_DEFINES "${COMPILE_DEFINES};QEMU_DUMMY")
+endif()
+
 set_property(
     TARGET
         cmsis nuclearAbstractModules framework application
@@ -25,8 +32,19 @@ set_property(
     PROPERTY
         COMPILE_OPTIONS -Wall -ffreestanding --specs=nano.specs -ffunction-sections -fdata-sections
 )
+set_property(
+    TARGET
+        nuclearAbstractModules framework application
+    APPEND
+    PROPERTY
+        COMPILE_DEFINITIONS ${COMPILE_DEFINES}
+)
 
 # Compile options common for C++ targets
+if(NOT use_libg)
+    set(COMPILE_OPTIONS_FLAGS -fno-exceptions -fno-non-call-exceptions -fno-rtti -fno-use-cxa-atexit)
+endif()
+
 set_property(
     TARGET
         nuclearAbstractModules framework application
@@ -38,5 +56,5 @@ set_property(
         nuclearAbstractModules framework application
     APPEND
     PROPERTY
-        COMPILE_OPTIONS -fno-exceptions -fno-non-call-exceptions -fno-rtti -fno-use-cxa-atexit
+        COMPILE_OPTIONS ${COMPILE_OPTIONS_FLAGS}
 )

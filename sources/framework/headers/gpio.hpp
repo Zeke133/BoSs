@@ -11,8 +11,7 @@
  * @copyright GNU Public License.
  */
 
-#ifndef _GPIO_H
-#define _GPIO_H
+#pragma once
 
 #include <stm32f1xx_ll_bus.h>
 #include <stm32f1xx_ll_gpio.h>
@@ -98,5 +97,3 @@ void enableAPB2Clock(GPIO_TypeDef * port);
 // Lock pin mech() - will help for instanses created once on start of programm
 
 }
-
-#endif

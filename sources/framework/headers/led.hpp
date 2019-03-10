@@ -11,8 +11,7 @@
  * @copyright GNU Public License.
  */
 
-#ifndef _LED_H
-#define _LED_H
+#pragma once
 
 #include "gpio.hpp"
 
@@ -49,5 +48,3 @@ private:
     uint32_t pin;
 
 };
-
-#endif

@@ -1,8 +1,8 @@
 /**
  * @file    thread.hpp
  * @author  Denis Homutovski
- * @version V1.0.0
- * @date    19-12-2019
+ * @version V1.0.1
+ * @date    10-03-2019
  * @brief   Thread class
  * @details   Implementation of thread instance
  * @pre       -
@@ -14,7 +14,10 @@
 #pragma once
 
 #include <cstdint>
+
+#ifndef NO_USE_LIBG
 #include <functional>
+#endif
 
 using std::uint32_t;
 
@@ -27,7 +30,9 @@ class Thread {
 public:
 
     /** Thread task function type */
+    #ifdef NO_USE_LIBG
     typedef void (*taskType)(void);
+    #endif
     /**
      * Enumeration of thread states
      */
@@ -39,7 +44,11 @@ public:
     };
 
     // auto lambda = +[](int result, const char* str);
+    #ifdef NO_USE_LIBG
     Thread(taskType task, uint32_t stackSizeWords, uint32_t * allocatedStack);
+    #else
+    Thread(std::function<void(void)> task, uint32_t stackSizeWords, uint32_t * allocatedStack);
+    #endif
 
     // join()
     // wait()

@@ -7,12 +7,8 @@ add_test(
     COMMAND nuclearAbstractModulesTests
 )
 
-# Set compiler and linker to build unit tests
-# because arm-toolchain was set previously
-# GoogleTest library use pthread
+# Set usual GCC compiler, because other targets use toolchain configuration.
 set(CMAKE_CXX_COMPILER  g++)
-set(CMAKE_LINKER        g++)
-set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER>  -pthread <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
 
 add_executable(nuclearAbstractModulesTests)
 
@@ -34,4 +30,15 @@ target_sources(
     PRIVATE threadTest
     PRIVATE schedulerTest
     PRIVATE runAllTests
+)
+
+# GoogleTest library use -pthread
+target_compile_options(
+        nuclearAbstractModulesTests
+    PRIVATE -pthread
+)
+
+target_link_options(
+        nuclearAbstractModulesTests
+    PRIVATE -pthread
 )

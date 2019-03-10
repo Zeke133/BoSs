@@ -11,8 +11,7 @@
  * @copyright GNU Public License.
  */
 
-#ifndef _SCHEDULER_H
-#define _SCHEDULER_H
+#pragma once
 
 #include <cstdint>
 
@@ -58,5 +57,3 @@ private:
     static Decision lastDecision;       /**< Last decision of scheduler */
     
 };
-
-#endif

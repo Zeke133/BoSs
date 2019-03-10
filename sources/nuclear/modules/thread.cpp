@@ -1,8 +1,8 @@
 /**
  * @file    thread.cpp
  * @author  Denis Homutovski
- * @version V1.0.0
- * @date    18-02-2019
+ * @version V1.0.1
+ * @date    10-03-2019
  * @brief   Thread class
  * @details   Implementation of thread instance
  * @pre       -
@@ -20,7 +20,11 @@
  * @param  allocatedStack: pointer to memory allocated for thread stack 
  * @retval None
  */
+#ifdef NO_USE_LIBG
 Thread::Thread(taskType task, uint32_t stackSizeWords, uint32_t * allocatedStack) {
+#else
+Thread::Thread(std::function<void(void)> task, uint32_t stackSizeWords, uint32_t * allocatedStack) {
+#endif
 
     /**
      * Initialization of stack frame for new thread on ARM Cortex-M3.
@@ -41,8 +45,14 @@ Thread::Thread(taskType task, uint32_t stackSizeWords, uint32_t * allocatedStack
     allocatedStack += stackSizeWords - 1;   /**< move to the last word of allocated stack array */
 
     *(allocatedStack--) = 0x21000000;       /**< default xPSR ??? 0x01000000 */
+
+    #ifdef NO_USE_LIBG
     //  -fno-rtti will disable usage of std::function
     *(allocatedStack--) = (unsigned long)task;  /**< PC - address of procedure to execute */
+    #else
+    *(allocatedStack--) = (uintptr_t)task.target<void(*)()>();  /**< PC - address of procedure to execute */
+    #endif
+
     *(allocatedStack--) = onReturnProc;     /**< LR - address of procedure to execute on task() return */
     *(allocatedStack--) = 12;               /**< R12 */
     *(allocatedStack--) = 3;                /**< R3 */

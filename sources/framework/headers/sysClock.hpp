@@ -11,8 +11,7 @@
  * @copyright GNU Public License.
  */
 
-#ifndef _SYS_CLOCK_H
-#define _SYS_CLOCK_H
+#pragma once
 
 #include <stm32f1xx_ll_rcc.h>
 #include <stm32f1xx_ll_system.h>
@@ -26,5 +25,3 @@ namespace SystemClock {
 void setClockTo72Mhz(void);
 
 }
-
-#endif

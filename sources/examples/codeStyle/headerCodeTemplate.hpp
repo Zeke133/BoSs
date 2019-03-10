@@ -1,8 +1,8 @@
 /**
  * @file    headerCodeTemplate.hpp
  * @author  Denis Homutovski
- * @version V1.0.0
- * @date    12-12-2019
+ * @version V1.0.q
+ * @date    10-03-2019
  * @brief   Class header template.
  * @details   Class header code-style template.
  * @pre       -
@@ -11,8 +11,7 @@
  * @copyright GNU Public License.
  */
 
-#ifndef _HEADER_CODE_TEMPLATE_H
-#define _HEADER_CODE_TEMPLATE_H
+#pragma once
 
 #include <cstdint>
 
@@ -75,5 +74,3 @@ private:
     PrivateBitField structAtribute;     /**< Attribute. */
     
 };
-
-#endif

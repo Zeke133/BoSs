@@ -2,17 +2,33 @@ cmake_minimum_required(VERSION 3.9)
 # ------------------------------------------------------------
 project(
     BOSS            # Bare Operating System Solution
-    VERSION         0.1.2
+    VERSION         0.0.3
     DESCRIPTION     "ARM Cortex-M3 minimal preemptive multitasking OS"
     HOMEPAGE_URL    "https://github.com/Zeke133/BoSs"
-    LANGUAGES
-        ASM
-        C
-        CXX
+    LANGUAGES       ASM C CXX
 )
 # ------------------------------------------------------------
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)   # generate file for IntelliSense
-# set(CMAKE_VERBOSE_MAKEFILE ON)        # print cmake traces
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)   # generate 'compile_commands.json' file for IntelliSense support
+set(CMAKE_VERBOSE_MAKEFILE OFF)         # compilation commands console output
+# ------------------------------------------------------------
+set(use_libg TRUE CACHE BOOL "Use standart C++ libs in project to allow modern C++17 and STL features")
+if(use_libg)
+    message("Modern C++17 and STL support activated. Largest executable size.")
+else()
+    message("Modern C++17 and STL support deactivated. Smallest executable size.")
+endif()
+
+message("Build type: ${CMAKE_BUILD_TYPE}")
+if(CMAKE_BUILD_TYPE STREQUAL Debug)
+    option(use_qemu_dummies "Use dummy implenetations to run project on QEMU" TRUE)
+    if(NOT use_qemu_dummies)
+        message(SEND_ERROR "QEMU dummies deactivated for Debug build type!")
+    endif()
+else()
+    if(use_qemu_dummies)
+        message(SEND_ERROR "QEMU dummies activated for non Debug build type!")
+    endif()
+endif()
 # ------------------------------------------------------------
 # Unit tests
 enable_testing()
@@ -45,12 +61,14 @@ add_subdirectory(sources)   # compile options
 add_executable(boss.elf)
 target_link_libraries(
         boss.elf
-    PRIVATE cmsis
     PRIVATE nuclearHardwareModules
     PRIVATE nuclearAbstractModules
     PRIVATE framework
     PRIVATE application
 )
+if(NOT use_qemu_dummies)
+    target_link_libraries(boss.elf PRIVATE cmsis)
+endif()
 set_target_properties(
         boss.elf
     PROPERTIES
@@ -58,21 +76,30 @@ set_target_properties(
 )
 # ---
 # Link properties
+set(PLATFORM_LINK_FLAGS     "-mcpu=cortex-m3 -mthumb")
 set(MAP_FILE_OUTPUT_PATH    ${PROJECT_SOURCE_DIR}/bin/boss.map)
 # -cref                     Include Cross Reference Table to .map file
 # --gc-sections             Throw out unused sections from output binary
 # -Map=fileName             Generate .map file
-set(USER_LINK_FLAGS         "-Map=${MAP_FILE_OUTPUT_PATH} -cref --gc-sections")
+set(USER_LINK_FLAGS_GCC_LD  "-Wl,-Map=${MAP_FILE_OUTPUT_PATH} -Wl,-cref -Wl,--gc-sections")
 set(LINKER_MEMORY_QEMU      ${PROJECT_SOURCE_DIR}/sources/nuclear/linker/linkerMemoryQemu.ld)
 set(LINKER_MEMORY_STM32     ${PROJECT_SOURCE_DIR}/sources/nuclear/linker/linkerMemoryStm32f103c8t6.ld)
-set(LINKER_SECTIONS_SCRIPT  ${PROJECT_SOURCE_DIR}/sources/nuclear/linker/linkerSections.ld)
-# set(PLATFORM_LINK_FLAGS     "-mcpu=cortex-m3 -mthumb")
-# set(EMBEDDED_LINK_FLAGS     "--specs=nano.specs --specs=nosys.specs -nostartfiles")
-# -nostdlib same as passing -nodefaultlibs and -nostartfiles
+if(use_libg)
+    # --specs=nano.specs    Link with 'libg_nano' special embedded optimized 'libg' implementation
+    # --specs=nosys.specs   Link with semihosting turned OFF
+    set(LIBS_LINK_FLAGS "--specs=nano.specs --specs=nosys.specs -nostartfiles")
+    set(LINKER_SECTIONS_SCRIPT  ${PROJECT_SOURCE_DIR}/sources/nuclear/linker/linkerSections.ld)
+else()
+    # -nostdlib             -nodefaultlibs & -nostartfiles: standart library is not linked
+    # -nodefaultlibs        Exceptions unwinding and RTTI for example will be disabled
+    set(LIBS_LINK_FLAGS "-nostdlib -DNOT_USE_EXCEPTIONS")
+    # without .ARM.exidx section
+    set(LINKER_SECTIONS_SCRIPT  ${PROJECT_SOURCE_DIR}/sources/nuclear/linker/linkerSectionsNoExc.ld)
+endif()
 set_target_properties(
         boss.elf
     PROPERTIES
-        LINK_FLAGS "${USER_LINK_FLAGS}"
+        LINK_FLAGS "${PLATFORM_LINK_FLAGS} ${LIBS_LINK_FLAGS} ${USER_LINK_FLAGS_GCC_LD}"
         LINK_FLAGS_DEBUG "-T${LINKER_MEMORY_QEMU} -T${LINKER_SECTIONS_SCRIPT}"
         LINK_FLAGS_RELEASE "-T${LINKER_MEMORY_STM32} -T${LINKER_SECTIONS_SCRIPT}"
         LINK_FLAGS_RELWITHDEBINFO "-T${LINKER_MEMORY_STM32} -T${LINKER_SECTIONS_SCRIPT}"
