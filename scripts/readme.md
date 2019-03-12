@@ -1,11 +1,12 @@
-# Folder with automation scripts for external tools
+# Folder with workflow automation scripts
 
-Some usefull scripts for building and work on project.
+Some usefull scripts for work on project.
 On first step with project call: **./scripts/sh/generateBuildTestSTM32.sh** to generate makefiles and build the project for STM32 real hardware target.
 
-Other scripts:
+## Scripts
 
-- **generateBuildTestQemu.sh** - Generate Cmake project. Build. Run unit-tests. For Qemu target.
+- **generateBuildTestSTM32.sh** Generate Cmake project. Build. Run unit-tests. Target: STM32 real MCU.
+- **generateBuildTestQemu.sh** - Generate Cmake project. Build. Run unit-tests. Target: QEMU.
 - **build.sh** - Build already generated Cmake project.
 - **run.sh** - Run executable in QEMU.
 - **runDebug.sh** - Run executable in QEMU and wait for GDB connection.
@@ -14,7 +15,7 @@ Other scripts:
 
 Scripts must be executed from **${projectRoot}** directory.
 
-Used tools:
+## Used tools
 
 - **arm-none-eabi** - GCC based toolchain for project compilation and linkage.
 - **GCC** - Compilers collection used for UnitTests building.
@@ -25,7 +26,7 @@ Used tools:
 - **stm32flash** - Uploading/downloading firmaware onto developement board. Communication with default stm32 bootloader.
 - **GDB** - Debug.
 
-**OpenOCD** and **stm32flash** must be placed in same directory like this project.
+**OpenOCD** and **stm32flash** must be placed in the same directory as the project.
 
     ...     someDir / ${projectRoot} / scripts / bat / ...
                                                / sh / ...
@@ -33,4 +34,4 @@ Used tools:
                     / stm32flash / ...
                     / OpenOCD / ...
 
-**arm-none-eabi**, **gcc**, **make**, **cmake/ctest** must be added to **PATH**
+**arm-none-eabi-\***, **g++**, **make**, **cmake/ctest** must be added to **PATH**

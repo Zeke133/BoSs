@@ -1,5 +1,11 @@
+# Binary output
+bin
 # Build directory
 build
+# MacOS trash
+.DS_Store
+# VSCode configuration
+.vscode
 
 # Object files
 *.elf
@@ -16,6 +22,3 @@ build
 *.hex
 *.bin
 *.sym
-
-# MacOS trash
-.DS_Store

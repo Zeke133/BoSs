@@ -1,6 +1,6 @@
-# Sources of project
+# Code sources
 
 - **application** - User application sources
 - **examples** - Code style templates
-- **framework** - Drivers and abstractions for rapid developement
-- **nuclear** - Operation system kernel
+- **framework** - BoSs hardware abstraction framework
+- **nuclear** - BoSs kernel
