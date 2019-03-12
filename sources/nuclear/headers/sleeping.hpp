@@ -24,75 +24,83 @@ class SleepingThreads {
 
 public:
 
-    void addThread(Thread * thread, uint32_t counter) {
-        listHead = thread;
-        // addIfNotEmpty
+    auto pushQueue(Thread * addThread, unsigned int needToSleep) {
 
-        // sum all counters
-        // thread->setCounter(counter - sum);
-    };
+        auto threadIterator = queueHead;
+        decltype(threadIterator) prevThreadIterator = nullptr;
+        
+        unsigned int sumSleepTicks = 0;
 
-    // this will call from SysTick
-    void tickCounters() {
-        // while(thread = listHead->next == 0) {
-        //     ... getNext
-        // }
-        // thread->counter--
-    }
+        while (threadIterator != nullptr) {
 
-    // this will call from PendSV
-    // return null or Thread ready to be runned
-    Thread * getReadyThread() {
-        // listHead->moveToNext
-        // return thread;
-        return nullptr;
-    }
+            sumSleepTicks += threadIterator->getSleepTicks();
+            if (needToSleep < sumSleepTicks)
+                break;
 
-private:
+            prevThreadIterator = threadIterator;
+            threadIterator = threadIterator->getNext();
+        }
 
-    void pushQueue(Thread * thread, uint32_t sleepTicks) {
+        if (threadIterator == nullptr) {    // adding last element
 
-        if (queueHead == nullptr) {
+            addThread->setNext(nullptr);
+            addThread->setSleepTicks(needToSleep - sumSleepTicks);
 
-            queueHead = thread;
-            thread->setSleepTicks(sleepTicks);
-            thread->setNext(nullptr);
+            if (prevThreadIterator == nullptr) {    // adding to empty list
+                
+                queueHead = addThread;
+            }
+            else {
+
+                prevThreadIterator->setNext(addThread);
+            }
         }
         else {
 
-            auto curr = queueHead;
-            uint32_t sumSleepTicks = 0;
+            prevThreadIterator->setNext(addThread);
+            addThread->setNext(threadIterator);
+            addThread->setSleepTicks(needToSleep - (sumSleepTicks - threadIterator->getSleepTicks()));
+            threadIterator->setSleepTicks(sumSleepTicks - needToSleep);
+        }
 
-            while (curr != nullptr) {
-
-                auto currSleepTicks = curr->getSleepTicks();
-                if (sleepTicks < sumSleepTicks + currSleepTicks) {
-
-                    // correct to handle insert in the middle of queue
-                    // insert only if next is more than inserted otherwise getNext
-                    thread->setSleepTicks(sleepTicks);
-                    thread->setNext(curr);
-                    curr->setSleepTicks(currSleepTicks - sleepTicks);
-                    queueHead = thread;
-                }
-                else {
-
-                    sumSleepTicks += currSleepTicks;
-                    curr = curr->getNext();
-                }
-            }
-            // next == nullptr                    
-            curr->setNext(thread);
-            thread->setNext(nullptr);
-            thread->setSleepTicks(sleepTicks - currSleepTicks);
-        }            
+        // extract common part
     }
 
-    Thread * pullQueue() {
+    auto tickTimers() {
 
+        auto threadIterator = queueHead;
+
+        while (threadIterator != nullptr) {
+
+            auto headSleepTicks = threadIterator->getSleepTicks();
+
+            if (headSleepTicks != 0) {
+
+                queueHead->setSleepTicks(headSleepTicks - 1);
+                break;
+            }
+            else {
+
+                threadIterator = threadIterator->getNext();
+            }
+        }
+    }
+
+    auto getExpiredThread() {
+
+        auto thread = queueHead;
+
+        if (thread == nullptr) return nullptr;
+
+        else {
+
+            if (thread->getSleepTicks() == 0) {
+
+                return thread;
+            }
+        }
     }
 
     Thread * queueHead = nullptr;    /**< Pointer to queue head */
-    Thread * tail = nullptr;
 
 };
