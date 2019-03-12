@@ -30,11 +30,13 @@ namespace BossKernelUnitTests {
         SchedulerTest() {
 
             if (!stackThreadPairsInitialized) {
+            
                 stackThreadPairs.reserve(13);
 
-                for(uint32_t i = 0; i < 13; i++) {
+                for(int i = 0; i < 13; ++i) {
                     
-                    std::vector<uint32_t> stack(17, i);
+                    std::array<uint32_t,17> stack;
+                    stack.fill(0);
                     Thread thread(&dummyTask, stack.size(), stack.data());
 
                     stackThreadPairs.push_back(std::make_pair(std::move(stack), std::move(thread)));
@@ -42,65 +44,75 @@ namespace BossKernelUnitTests {
                 stackThreadPairsInitialized = true;
             }
         }
-        // ~SchedulerTest() override {}
 
-        static void dummyTask() {};
+        static void dummyTask() { /* Will not run in UnitTests */ };
 
-        static std::vector<std::pair<std::vector<uint32_t>,Thread>> stackThreadPairs;
+        static std::vector<std::pair<std::array<uint32_t,17>,Thread>> stackThreadPairs;
         static bool stackThreadPairsInitialized;
     };
 
-    std::vector<std::pair<std::vector<uint32_t>,Thread>> SchedulerTest::stackThreadPairs;
+    std::vector<std::pair<std::array<uint32_t,17>,Thread>> SchedulerTest::stackThreadPairs;
     bool SchedulerTest::stackThreadPairsInitialized = false;
 
     TEST_F(SchedulerTest, NoThreadExceptions) {
+    
         ASSERT_NO_THROW(Scheduler::getCurrentThread());
         ASSERT_NO_THROW(Scheduler::takeDecision());
     }
 
     TEST_F(SchedulerTest, NoThreadGetCurrent) {
+    
         EXPECT_EQ(Scheduler::getCurrentThread(), nullptr);
     }
 
     TEST_F(SchedulerTest, NoThreadDecision) {
+    
         EXPECT_EQ(Scheduler::takeDecision(), Scheduler::Decision::noAction);
     }
 
     TEST_F(SchedulerTest, AddFirstThreadException) {
+    
         ASSERT_NO_THROW(Scheduler::addThread(&stackThreadPairs.at(0).second));
     }
 
     TEST_F(SchedulerTest, OneThreadGetCurrent) {
+    
         ASSERT_EQ(Scheduler::getCurrentThread(), &stackThreadPairs.at(0).second);
         ASSERT_EQ(Scheduler::getCurrentThread()->getState(), Thread::State::initialized);
         ASSERT_EQ(*(Scheduler::getCurrentThread()->getStackTop()), 0);
     }
 
     TEST_F(SchedulerTest, OneThreadGetNext) {
+    
         ASSERT_EQ(Scheduler::getCurrentThread()->getNext(), &stackThreadPairs.at(0).second);
     }
 
     TEST_F(SchedulerTest, OneThreadDecision) {
+    
         EXPECT_EQ(Scheduler::takeDecision(), Scheduler::Decision::onlyRestore);
     }
 
     TEST_F(SchedulerTest, AddSecondThreadException) {
+    
         ASSERT_NO_THROW(Scheduler::addThread(&stackThreadPairs.at(1).second));
     }
 
     /**< Current Thread should always point to the first added Thread */
     TEST_F(SchedulerTest, TwoThreadsGetCurrent) {
+    
         ASSERT_EQ(Scheduler::getCurrentThread(), &stackThreadPairs.at(0).second);
         ASSERT_EQ(Scheduler::getCurrentThread()->getState(), Thread::State::initialized);
         ASSERT_EQ(*(Scheduler::getCurrentThread()->getStackTop()), 0);
     }
 
     TEST_F(SchedulerTest, TwoThreadsGetNext) {
+    
         ASSERT_EQ(Scheduler::getCurrentThread()->getNext(), &stackThreadPairs.at(1).second);
         ASSERT_EQ(Scheduler::getCurrentThread()->getNext()->getNext(), &stackThreadPairs.at(0).second);
     }
 
     TEST_F(SchedulerTest, TwoThreadsDecision) {
+    
         EXPECT_EQ(Scheduler::takeDecision(), Scheduler::Decision::onlyRestore);
     }
 

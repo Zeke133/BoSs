@@ -19,8 +19,6 @@
 #include <functional>
 #endif
 
-using std::uint32_t;
-
 /**
  * Class implement thread instance abstraction.
  * Some parts of code are used from Asembler, so change carefully.

@@ -1,8 +1,8 @@
 /**
  * @file    threadTest.cpp
  * @author  Denis Homutovski
- * @version V1.0.0
- * @date    22-12-2019
+ * @version V1.0.1
+ * @date    12-03-2019
  * @brief   Thread class tests
  * @details   Unit tests
  * @pre       -
@@ -41,15 +41,14 @@ namespace BossKernelUnitTests {
 
     class ThreadTest : public ::testing::Test {
 
-        protected:
+    protected:
 
         ThreadTest() :
-            task([](){ std::cout << "Dummy task"; }),
-            stack(16, 666),
-            thread(task, stack.size(), stack.data()) {
+            task([](){ /* Dummy task */ }),
+            thread(task, stack.max_size(), stack.data()) {
         };
 
-        std::vector<uint32_t> stack;
+        std::array<uint32_t,16> stack;
         std::function<void(void)> task;
         Thread thread;
     };
@@ -66,13 +65,12 @@ namespace BossKernelUnitTests {
     
     TEST_F(ThreadTest, TopOfStackAccess) {
 
-        auto stackTopPtr = thread.getStackTop();
+        const auto& stackTopPtr = thread.getStackTop();
 
-        auto stackTop = std::end(stack);
-        stackTop -= 16;
-        *stackTop = 2212;
+        // 16 words is initialized stack frame length
+        *(std::end(stack)-16) = 2212;
 
-        ASSERT_EQ(*stackTopPtr, *stackTop);
+        ASSERT_EQ(*stackTopPtr, 2212);
     }
 
     TEST_F(ThreadTest, StackFrameInitialization) {

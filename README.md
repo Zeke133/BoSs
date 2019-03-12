@@ -71,6 +71,7 @@ There are two targets to copmile the project possible and handled with Cmake *CM
 - [ ] SLEEPING threads queue
 - [ ] Thread SLEEP()
 - [ ] Mutex and semafore
+- [ ] cppCheck static analisis
 - [ ] Self test with semafore and poling systimer
 - [ ] Make user treads to run in Unprivileged mode and one thread for kernel tasks. Run user main() from _init. before this go to PSP unprivileged mode.
 - [ ] Stack Overflow detection by "endmarks"

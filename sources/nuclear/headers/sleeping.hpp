@@ -24,7 +24,7 @@ class SleepingThreads {
 
 public:
 
-    auto pushQueue(Thread * addThread, unsigned int needToSleep) {
+    void push(Thread * addThread, unsigned int needToSleep) {
 
         auto threadIterator = queueHead;
         decltype(threadIterator) prevThreadIterator = nullptr;
@@ -66,7 +66,7 @@ public:
         // extract common part
     }
 
-    auto tickTimers() {
+    void tick() {
 
         auto threadIterator = queueHead;
 
@@ -86,7 +86,7 @@ public:
         }
     }
 
-    auto getExpiredThread() {
+    auto getExpired() -> Thread * {
 
         auto thread = queueHead;
 
@@ -95,11 +95,18 @@ public:
         else {
 
             if (thread->getSleepTicks() == 0) {
-
+                
+                queueHead = thread->getNext();
                 return thread;
+            }
+            else {
+                
+                return nullptr;
             }
         }
     }
+    
+private:
 
     Thread * queueHead = nullptr;    /**< Pointer to queue head */
 
