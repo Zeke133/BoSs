@@ -35,11 +35,11 @@ namespace BossKernelUnitTests {
 
                 for(int i = 0; i < 13; ++i) {
                     
-                    std::array<uint32_t,17> stack;
-                    stack.fill(0);
-                    Thread thread(&dummyTask, stack.size(), stack.data());
+                    std::unique_ptr<std::array<uint32_t,17>> stack(new std::array<uint32_t,17>);
 
-                    stackThreadPairs.push_back(std::make_pair(std::move(stack), std::move(thread)));
+                    std::unique_ptr<Thread> thread(new Thread(&dummyTask, stack->max_size(), stack->data()));
+
+                    stackThreadPairs.emplace_back(std::make_pair(std::move(stack), std::move(thread)));
                 }
                 stackThreadPairsInitialized = true;
             }
@@ -47,11 +47,21 @@ namespace BossKernelUnitTests {
 
         static void dummyTask() { /* Will not run in UnitTests */ };
 
-        static std::vector<std::pair<std::array<uint32_t,17>,Thread>> stackThreadPairs;
+        static std::vector<
+                    std::pair<
+                        std::unique_ptr<std::array<uint32_t,17>>, 
+                        std::unique_ptr<Thread>
+                    >
+                > stackThreadPairs;
         static bool stackThreadPairsInitialized;
     };
 
-    std::vector<std::pair<std::array<uint32_t,17>,Thread>> SchedulerTest::stackThreadPairs;
+    std::vector<
+        std::pair<
+            std::unique_ptr<std::array<uint32_t,17>>,
+            std::unique_ptr<Thread>
+        >
+    > SchedulerTest::stackThreadPairs;
     bool SchedulerTest::stackThreadPairsInitialized = false;
 
     TEST_F(SchedulerTest, NoThreadExceptions) {
@@ -72,19 +82,18 @@ namespace BossKernelUnitTests {
 
     TEST_F(SchedulerTest, AddFirstThreadException) {
     
-        ASSERT_NO_THROW(Scheduler::addThread(&stackThreadPairs.at(0).second));
+        ASSERT_NO_THROW(Scheduler::addThread(stackThreadPairs.at(0).second.get()));
     }
 
     TEST_F(SchedulerTest, OneThreadGetCurrent) {
     
-        ASSERT_EQ(Scheduler::getCurrentThread(), &stackThreadPairs.at(0).second);
+        ASSERT_EQ(Scheduler::getCurrentThread(), stackThreadPairs.at(0).second.get());
         ASSERT_EQ(Scheduler::getCurrentThread()->getState(), Thread::State::initialized);
-        ASSERT_EQ(*(Scheduler::getCurrentThread()->getStackTop()), 0);
     }
 
     TEST_F(SchedulerTest, OneThreadGetNext) {
     
-        ASSERT_EQ(Scheduler::getCurrentThread()->getNext(), &stackThreadPairs.at(0).second);
+        ASSERT_EQ(Scheduler::getCurrentThread()->getNext(), stackThreadPairs.at(0).second.get());
     }
 
     TEST_F(SchedulerTest, OneThreadDecision) {
@@ -94,21 +103,20 @@ namespace BossKernelUnitTests {
 
     TEST_F(SchedulerTest, AddSecondThreadException) {
     
-        ASSERT_NO_THROW(Scheduler::addThread(&stackThreadPairs.at(1).second));
+        ASSERT_NO_THROW(Scheduler::addThread(stackThreadPairs.at(1).second.get()));
     }
 
     /**< Current Thread should always point to the first added Thread */
     TEST_F(SchedulerTest, TwoThreadsGetCurrent) {
     
-        ASSERT_EQ(Scheduler::getCurrentThread(), &stackThreadPairs.at(0).second);
+        ASSERT_EQ(Scheduler::getCurrentThread(), stackThreadPairs.at(0).second.get());
         ASSERT_EQ(Scheduler::getCurrentThread()->getState(), Thread::State::initialized);
-        ASSERT_EQ(*(Scheduler::getCurrentThread()->getStackTop()), 0);
     }
 
     TEST_F(SchedulerTest, TwoThreadsGetNext) {
     
-        ASSERT_EQ(Scheduler::getCurrentThread()->getNext(), &stackThreadPairs.at(1).second);
-        ASSERT_EQ(Scheduler::getCurrentThread()->getNext()->getNext(), &stackThreadPairs.at(0).second);
+        ASSERT_EQ(Scheduler::getCurrentThread()->getNext(), stackThreadPairs.at(1).second.get());
+        ASSERT_EQ(Scheduler::getCurrentThread()->getNext()->getNext(), stackThreadPairs.at(0).second.get());
     }
 
     TEST_F(SchedulerTest, TwoThreadsDecision) {
@@ -121,12 +129,11 @@ namespace BossKernelUnitTests {
         for(uint32_t threadsInList = 2; threadsInList < stackThreadPairs.size(); ++threadsInList) {
             
             // add thread
-            ASSERT_NO_THROW(Scheduler::addThread(&stackThreadPairs.at(threadsInList).second));
+            ASSERT_NO_THROW(Scheduler::addThread(stackThreadPairs.at(threadsInList).second.get()));
 
             // check if current thread is still the 1st added thread
-            ASSERT_EQ(Scheduler::getCurrentThread(), &stackThreadPairs.at(0).second);
+            ASSERT_EQ(Scheduler::getCurrentThread(), stackThreadPairs.at(0).second.get());
             ASSERT_EQ(Scheduler::getCurrentThread()->getState(), Thread::State::initialized);
-            ASSERT_EQ(*(Scheduler::getCurrentThread()->getStackTop()), 0);
             // check decision
             ASSERT_EQ(Scheduler::takeDecision(), Scheduler::Decision::onlyRestore);
 
@@ -134,7 +141,7 @@ namespace BossKernelUnitTests {
             Thread * threadIterator = Scheduler::getCurrentThread()->getNext();
             for(uint32_t thread = 1; thread < threadsInList; thread++) {
                 
-                ASSERT_EQ(threadIterator, &stackThreadPairs.at(thread).second);
+                ASSERT_EQ(threadIterator, stackThreadPairs.at(thread).second.get());
                 threadIterator = threadIterator->getNext();
             }
         }

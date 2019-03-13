@@ -45,8 +45,7 @@ namespace BossKernelUnitTests {
 
         ThreadTest() :
             task([](){ /* Dummy task */ }),
-            thread(task, stack.max_size(), stack.data()) {
-        };
+            thread(task, stack.max_size(), stack.data()) {};
 
         std::array<uint32_t,16> stack;
         std::function<void(void)> task;
@@ -65,12 +64,10 @@ namespace BossKernelUnitTests {
     
     TEST_F(ThreadTest, TopOfStackAccess) {
 
-        const auto& stackTopPtr = thread.getStackTop();
-
         // 16 words is initialized stack frame length
         *(std::end(stack)-16) = 2212;
 
-        ASSERT_EQ(*stackTopPtr, 2212);
+        ASSERT_EQ(*thread.getStackTop(), 2212);
     }
 
     TEST_F(ThreadTest, StackFrameInitialization) {

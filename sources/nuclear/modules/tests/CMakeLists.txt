@@ -27,10 +27,10 @@ target_sources(
         nuclearAbstractModulesTests
     PRIVATE ${nuclearAbstractModulesPath}/thread
     PRIVATE ${nuclearAbstractModulesPath}/scheduler
-    PRIVATE ${nuclearAbstractModulesPath}/sleeping
+    PRIVATE ${nuclearAbstractModulesPath}/timerQueue
     PRIVATE threadTest
     PRIVATE schedulerTest
-    PRIVATE sleepingTest
+    PRIVATE timerQueueTest
     PRIVATE runAllTests
 )
 
