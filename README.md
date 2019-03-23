@@ -49,6 +49,11 @@ There are two targets to copmile the project possible and handled with Cmake *CM
 - *stm32flash* - Uploading/downloading firmaware onto developement board. Communication with default stm32 bootloader.
 - *GDB* - Debug.
 
+## Last builds size
+
+- STM32 bare metal without std libs: Flash - 2024 bytes, RAM - 8+20 bytes
+- STM32 bare metal with std libg_nano: Flash - 14280 bytes, RAM - 124+88 bytes
+
 ## To Do
 
 - [x] Clean project from garbage
@@ -68,6 +73,8 @@ There are two targets to copmile the project possible and handled with Cmake *CM
 - [x] **Scheduler must also set nextThread pointer**
 - [x] target for libC or not? use standart libC and exceptions? **write manual**
 - [x] #pragma once use and delete uint32_t where is not needed
+- [x] look like wrong thread SP in PendSV- problem was in std::function
+- [ ] write unit tests of scheduler
 - [ ] SLEEPING threads queue
 - [ ] Thread SLEEP()
 - [ ] Mutex and semafore

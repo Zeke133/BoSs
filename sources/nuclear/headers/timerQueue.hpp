@@ -1,8 +1,8 @@
 /**
  * @file    timerQueue.hpp
  * @author  Denis Homutovski
- * @version V1.0.0
- * @date    13-03-2019
+ * @version V1.0.1
+ * @date    17-03-2019
  * @brief   TimerQueue class
  * @details   Implementation of queue for thread timers
  * @pre       -
@@ -19,18 +19,18 @@
 
 /**
  * Class implements queue for thread timers.
- * On each tick just 1 element is changed, not all the stored timers.
- * Queue store time difference between timers instead of absolute time.
+ * On each tick just one element in queue needs to be changed, not all the stored timers.
+ * It's achieved because each element store time addition between timers instead of absolute time.
  * Such the way it must help to improve scheduling performance.
- * O(1) amortized timer tick execution time.
- * O(1) amortized expired timer return time.
- * O(n) amortized addition of new timer time.
+ * tick - O(1) constant amortized timer tick execution time.
+ * pop - O(1) constant expired timer access time.
+ * push - O(n) linear amortized time of new timer addition.
  */
 class TimerQueue {
 
 public:
 
-    void push(Thread * newThread, unsigned int needToSleep);
+    void push(Thread& newThread, unsigned int needToSleep);
 
     void tick();
 
@@ -38,6 +38,6 @@ public:
     
 private:
 
-    Thread * queueHead = nullptr;    /**< Pointer to queue head */
+    ThreadList queue;   /**< boost::intrusive slist */
 
 };

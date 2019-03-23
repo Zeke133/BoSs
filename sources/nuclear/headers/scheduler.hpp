@@ -1,8 +1,8 @@
 /**
  * @file    scheduler.hpp
  * @author  Denis Homutovski
- * @version V1.0.1
- * @date    21-02-2019
+ * @version V1.0.2
+ * @date    18-03-2019
  * @brief   Scheduler class
  * @details   Implementation of threads scheduling algorithm
  * @pre       -
@@ -29,31 +29,36 @@ public:
      * Specifies decisions of scheduler to be fulfilled in interrupt handler
      */
     enum class Decision : uint8_t {
-        noAction = 0,   /**< context switch is not needed */
-        onlyRestore,    /**< context just need to be restored from thread stack */
-        saveAndRestore, /**
-                         * need to save current context
-                         * switch current thread pointer to next thread scheduled
-                         * and restore new context
-                         */
+        noAction = 0,       /**< context switch is not needed */
+        onlyRestore = 1,    /**< context just need to be restored from thread stack */
+        saveAndRestore = 2  /**
+                             * need to save current context
+                             * switch current thread pointer to next thread scheduled
+                             * and restore new context
+                             */
     };
 
-    /**
-     * Add thread to scheduler list tail.
-     * If list is empty - add thread and create self reference in it.
-     */
-    static void addThread(Thread * thread);
+    static void addThread(Thread& newThread);
+    static void kill(Thread& thread);
 
-    static Decision takeDecision(void);     /**< Used from ASM context switch procedure */
-    static Thread * getCurrentThread(void); /**< Used from ASM context switch procedure */
+    static auto takeDecision(void) -> Decision; /**< Used from ASM context switch procedure */
+    static auto getActiveThread(void) -> Thread * ;
+
+    // join()
+    // wait()
 
 private:
 
-    static Thread * pauseCurrentThread(void);   /**< Used from ASM context switch procedure */
-    static Thread * runNextThread(void);        /**< Used from ASM context switch procedure */
+    static Thread * pauseActiveThread(void);    /**< Used from ASM context switch procedure */
+    static Thread * activateNextThread(void);   /**< Used from ASM context switch procedure */
 
-    static Thread * currentThread;      /**< Pointer to current active thread instance */
-    static Thread * nextThread;         /**< Pointer to next thread to be executed */
-    static Decision lastDecision;       /**< Last decision of scheduler */
-    
+    static ThreadList normalQueue;              /**< boost::intrusive slist */
+
+    static Thread * activeThreadPtr;            /**< Current active thread pointer */
+    static Thread * nextThreadPtr;              /**< Next thread to be executed pointer */
+
+    // ActiveThreadsQueue - prioritized?
+    // SleepingThreadsQueue
+    // TimersQueue - Make HIGHEST priority and use just for really short procedures
+    // BlockedThreadsQueue - mutex/semafore and s.o.
 };

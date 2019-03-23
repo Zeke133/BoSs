@@ -7,7 +7,7 @@
  * @details   Bare metal initalization code.
               Initialize Vector table, load BSS and DATA segments to RAM.
               Implement Reset_Handler and Default_Handler.
-              Call to SystemInit() and __START().
+              Call to SystemInit() and _start().
  * @copyright GNU Public License.
  */
 
@@ -181,7 +181,7 @@ Reset_Handler:
                 blt     .L_loop3
 
                 bl      SystemInit                          /**< Branch with updating of LR(Link Register) to function */
-                bl      __START
+                bl      _start
 
                 .fnend
                 .size   Reset_Handler, . - Reset_Handler

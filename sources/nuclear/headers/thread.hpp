@@ -1,8 +1,8 @@
 /**
  * @file    thread.hpp
  * @author  Denis Homutovski
- * @version V1.0.1
- * @date    10-03-2019
+ * @version V1.0.2
+ * @date    17-03-2019
  * @brief   Thread class
  * @details   Implementation of thread instance
  * @pre       -
@@ -14,10 +14,9 @@
 #pragma once
 
 #include <cstdint>
+#include <boost/intrusive/slist.hpp>
 
-#ifndef NO_USE_LIBG
-#include <functional>
-#endif
+using namespace boost::intrusive;
 
 /**
  * Class implement thread instance abstraction.
@@ -27,49 +26,52 @@ class Thread {
 
 public:
 
-    /** Thread task function type */
-    #ifdef NO_USE_LIBG
-    typedef void (*taskType)(void);
-    #endif
-    /**
-     * Enumeration of thread states
-     */
-    enum class State : uint8_t {
+    typedef void (*TaskType)(void);     /**< Thread task function type */
+    
+    enum class State : uint8_t {        /**< Enumeration of thread states */
 
-        initialized = 0,    /**< thread initialized and ready to run */
-        paused,             /**< thread is waiting */
-        running,            /**< thread is active */
+        initialized = 0,    /**< new thread initialized and ready to run */
+        waiting,            /**< waiting in queue */
+        active,             /**< active */
+        sleep,              /**< sleeping in queue */
+        blocked,            /**< blocked with mutex/semafore */
+        killed              /**< thread is dead! */
     };
 
     // auto lambda = +[](int result, const char* str);
-    #ifdef NO_USE_LIBG
-    Thread(taskType task, uint32_t stackSizeWords, uint32_t * allocatedStack);
-    #else
-    Thread(std::function<void(void)> task, uint32_t stackSizeWords, uint32_t * allocatedStack);
-    #endif
-
-    // join()
-    // wait()
-    // kill()
+    Thread(TaskType task, uint32_t stackSizeWords, uint32_t * allocatedStack);
     
-    uint32_t * getStackTop() const { return stackTop; };
+    auto getStackPointer() const { return stackPointer; };
 
-    Thread * getNext() const { return this->next; };
-    void setNext(Thread * nextThread) { this->next = nextThread; };
-
-    State getState() const { return state; };
+    auto getState() const { return state; };
     void setState(State newState) { this->state = newState; };
 
-    uint32_t getSleepTicks() { return sleepTicks; };
+    auto getSleepTicks() { return sleepTicks; };
     void setSleepTicks(uint32_t ticks) { this->sleepTicks = ticks; };
+
+    bool operator==(const Thread& t) const { return stackPointer == t.stackPointer; }
 
 private:
 
-    uint32_t * stackTop;                /**< must be on first place! used from asembler */
-    Thread * next = nullptr;            /**< next thread in linked list */
+    uint32_t * stackPointer;            /**< must be on first place! used from asembler */
+
+    // uint8_t pid;                     /**< process Id */
     State state;                        /**< current state */
     uint32_t sleepTicks;                /**< amount of SysTicks to sleep */
 
     constexpr static uint32_t onReturnProc = 333; /**< just a MagicInt dummy implementation */
-    
+
+public:
+
+    slist_member_hook<> slist_hook_;    /**< Boost singly linked list hook */
+    /**
+     * Can't use inheritance because 'stackPointer'
+     * has to be in first byte of Class data for correct work
+     * of assembler writen contex switcher
+     */
+
 };
+
+/** Define an slist that will store Thread using the public member hook */
+typedef member_hook <Thread, slist_member_hook<>, &Thread::slist_hook_> ThreadSlistMemberOption;
+typedef slist <Thread, ThreadSlistMemberOption, cache_last <true>> ThreadList;

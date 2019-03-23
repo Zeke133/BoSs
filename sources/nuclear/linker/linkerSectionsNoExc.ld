@@ -47,62 +47,14 @@ SECTIONS
 								/* Otherwise linking with --gc-sections flag will do it. */
 		
 		. = ALIGN(4);			/* Align current address pointer to 4 */
-		*(.text)				/* put here .text sections from all object files */
-		
-		/* This section holds executable instructions that contribute to the process initialization code.
-		 * When a program starts to run, the system arranges to execute the code in this section
-		 * before calling the main program entry point (called main for C programs)
-		KEEP(*(.init))
-		*/
-		/* This section holds executable instructions that contribute to the process termination code.
-		 * That is, when a program exits normally, the system arranges to execute the code in this section.
-		KEEP(*(.fini))
-		*/
-
-		/* .ctors
-		 * This section contains a list of global constructor function pointers. */
-		/*
-		*crtbegin.o(.ctors)
-		*crtbegin?.o(.ctors)
-		*(EXCLUDE_FILE(*crtend?.o *crtend.o) .ctors)
-		*(SORT(.ctors.*))
-		*(.ctors)
-		*/
-
-		/* .dtors
-		 * This section contains a list of global destructor function pointers. */
- 		/*
-		*crtbegin.o(.dtors)
- 		*crtbegin?.o(.dtors)
- 		*(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
- 		*(SORT(.dtors.*))
- 		*(.dtors)
-		*/
-
-		/* This section contains information necessary for frame unwinding during exception handling. */
-		/*
-		KEEP(*(.eh_frame*))
-		*/
+		*(.text*)				/* put here .text sections from all object files */
 	} > ROM
-	
-	/* Exceptions unwind info. Comment if no any standart library is used!
-	.ARM.extab :
-	{
-		*(.ARM.extab* .gnu.linkonce.armextab.*)
-	} > ROM
-	__exidx_start = .;
-	.ARM.exidx :
-	{
-		*(.ARM.exidx* .gnu.linkonce.armexidx.*)
-	} > ROM
-	__exidx_end = .;
-	 */
 	
     /* Constant data to .rodata section */
     .rodata :
     {
         . = ALIGN(4);
-        *(.rodata)
+        *(.rodata*)
     } > ROM
 
     __etext = .;			/* define a global symbols at end of code */
@@ -119,27 +71,13 @@ SECTIONS
 
 		. = ALIGN(4);
 		/* This section holds an array of function pointers that contributes to a single
-		 * pre-initialization array for the executable or shared object containing the section.
-		PROVIDE_HIDDEN (__preinit_array_start = .);
-		KEEP(*(.preinit_array))
-		PROVIDE_HIDDEN (__preinit_array_end = .);
-		*/
-		. = ALIGN(4);
-		/* This section holds an array of function pointers that contributes to a single
 		 * initialization array for the executable or shared object containing the section.
+		*/
 		PROVIDE_HIDDEN (__init_array_start = .);
 		KEEP(*(SORT(.init_array.*)))
 		KEEP(*(.init_array))
 		PROVIDE_HIDDEN (__init_array_end = .);
-		*/
-		. = ALIGN(4);
-		/* This section holds an array of function pointers that contributes to a single
-		 * termination array for the executable or shared object containing the section.
-		PROVIDE_HIDDEN (__fini_array_start = .);
-		KEEP(*(SORT(.fini_array.*)))
-		KEEP(*(.fini_array))
-		PROVIDE_HIDDEN (__fini_array_end = .);
-		*/
+
 		. = ALIGN(4);
 		/* All data end */
 		__data_end__ = .;

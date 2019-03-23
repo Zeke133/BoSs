@@ -1,8 +1,8 @@
 /**
  * @file    application.cpp
  * @author  Denis Homutovski
- * @version V1.0.0
- * @date    10-03-2019
+ * @version V1.0.1
+ * @date    17-03-2019
  * @brief   Application class
  * @details   Implementation of application
  * @pre       -
@@ -18,6 +18,8 @@
 
 #include "led.hpp"
 #include "sysClock.hpp"
+
+extern void main(void);
 
 // SysTick timer
 uint32_t * const SYST_CSR = (uint32_t *)0xE000E010;     // Privileged a SysTick Control and Status Register
@@ -64,6 +66,37 @@ void sysTickInit() {
 
 extern "C" {
 
+#ifdef NO_USE_LIBG
+// used with boost
+void __assert_func(const char* file, int line, const char* func, const char* expression) {
+    while(1);
+};
+// need for correct global classes initialization
+void callStaticConstructors() {
+
+    // Start and end points of the constructor list,
+    // defined by the linker script.
+    extern void (*__init_array_start)();
+    extern void (*__init_array_end)();
+
+    // Call each function in the list.
+    // We have to take the address of the symbols, as __init_array_start *is*
+    // the first function pointer, not the address of it.
+    for (void (**p)() = &__init_array_start; p < &__init_array_end; ++p) {
+        (*p)();
+    }
+}
+// kernel initialization
+void _start() {
+
+    callStaticConstructors();
+    // priority of interrupts SysTick and PendSV
+    main();
+
+    // switch to unprivileged and sleep? - or trigger ContextSwitch imideatly
+}
+#endif
+
 void SysTick_Handler(void) {
     
     // timer stop
@@ -81,11 +114,7 @@ void SystemInit(void) {
     printStr("ARM Cortex-M3 has started up!\n");
 }
 #endif
-void __START(void) {
-
-    // nucleus
-
-    // priority of interrupts SysTick and PendSV
+void main(void) {
 
     volatile uint32_t thread1Stack[40];     // stack for thread 100x4=400 bytes
     volatile uint32_t thread2Stack[30];
@@ -112,11 +141,11 @@ void __START(void) {
 
     Thread thread1(task1, (sizeof thread1Stack)/4, (uint32_t *)&thread1Stack);
     Thread thread2(task2, (sizeof thread2Stack)/4, (uint32_t *)&thread2Stack);
-    Thread thread3(task2, (sizeof thread3Stack)/4, (uint32_t *)&thread3Stack);
+    Thread thread3(task1, (sizeof thread3Stack)/4, (uint32_t *)&thread3Stack);
 
-    Scheduler::addThread(&thread1);
-    Scheduler::addThread(&thread2);
-    // Scheduler::addThread(&thread3);
+    Scheduler::addThread(thread1);
+    Scheduler::addThread(thread2);
+    Scheduler::addThread(thread3);
 
     #ifndef QEMU_DUMMY
     SystemClock::setClockTo72Mhz();
@@ -125,10 +154,11 @@ void __START(void) {
     LED led(GPIOC, LL_GPIO_PIN_13);
     led.on();
 
+    // where to place?
     sysTickInit();
+
+    while(1);
     
-    // switch to unprivileged and sleep? - or trigger ContextSwitch imideatly
-    while(1) ;
 }
 
 }

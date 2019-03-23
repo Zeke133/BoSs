@@ -8,8 +8,14 @@ project(
     LANGUAGES       ASM C CXX
 )
 # ------------------------------------------------------------
+enable_testing()                        # Unit tests
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)   # generate 'compile_commands.json' file for IntelliSense support
 set(CMAKE_VERBOSE_MAKEFILE OFF)         # compilation commands console output
+# ------------------------------------------------------------
+# Path to GoogleTest Framework - change for your location! Find doesn't work great with GTest.
+set(GOOGLE_TEST_DIR ${PROJECT_SOURCE_DIR}/../googleTest)
+# Path to Boost header only libraries - change for your location!
+set(BOOST_DIR ${PROJECT_SOURCE_DIR}/../boost_1_69_0)
 # ------------------------------------------------------------
 set(use_libg TRUE CACHE BOOL "Use standart C++ libs in project to allow modern C++17 and STL features")
 if(use_libg)
@@ -17,7 +23,7 @@ if(use_libg)
 else()
     message("Modern C++17 and STL support deactivated. Smallest executable size.")
 endif()
-
+# ------------------------------------------------------------
 message("Build type: ${CMAKE_BUILD_TYPE}")
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
     option(use_qemu_dummies "Use dummy implenetations to run project on QEMU" TRUE)
@@ -29,11 +35,6 @@ else()
         message(SEND_ERROR "QEMU dummies activated for non Debug build type!")
     endif()
 endif()
-# ------------------------------------------------------------
-# Unit tests
-enable_testing()
-# Path to GoogleTest Framework - change for your location! Find doesn't work great with GTest.
-set(GOOGLE_TEST_DIR ${PROJECT_SOURCE_DIR}/../googleTest)
 # ------------------------------------------------------------
 set(CMAKE_ASM_FLAGS_DEBUG "-g")
 set(CMAKE_C_FLAGS_DEBUG "-g")
@@ -87,12 +88,12 @@ set(LINKER_MEMORY_STM32     ${PROJECT_SOURCE_DIR}/sources/nuclear/linker/linkerM
 if(use_libg)
     # --specs=nano.specs    Link with 'libg_nano' special embedded optimized 'libg' implementation
     # --specs=nosys.specs   Link with semihosting turned OFF
-    set(LIBS_LINK_FLAGS "--specs=nano.specs --specs=nosys.specs -nostartfiles")
+    set(LIBS_LINK_FLAGS "--specs=nano.specs --specs=nosys.specs")
     set(LINKER_SECTIONS_SCRIPT  ${PROJECT_SOURCE_DIR}/sources/nuclear/linker/linkerSections.ld)
 else()
     # -nostdlib             -nodefaultlibs & -nostartfiles: standart library is not linked
     # -nodefaultlibs        Exceptions unwinding and RTTI for example will be disabled
-    set(LIBS_LINK_FLAGS "-nostdlib -DNOT_USE_EXCEPTIONS")
+    set(LIBS_LINK_FLAGS "-nostdlib")
     # without .ARM.exidx section
     set(LINKER_SECTIONS_SCRIPT  ${PROJECT_SOURCE_DIR}/sources/nuclear/linker/linkerSectionsNoExc.ld)
 endif()

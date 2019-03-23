@@ -39,8 +39,8 @@ PendSV_Handler:
 
                 /* Here the procedure names definitions linked from C++ code class Scheduler */
                 .equ    takeDecision,       _ZN9Scheduler12takeDecisionEv
-                .equ    pauseCurrentThread, _ZN9Scheduler18pauseCurrentThreadEv
-                .equ    runNextThread,      _ZN9Scheduler13runNextThreadEv
+                .equ    pauseActiveThread,  _ZN9Scheduler17pauseActiveThreadEv
+                .equ    activateNextThread, _ZN9Scheduler18activateNextThreadEv
 
                 BL      takeDecision        /**< call Scheduler::takeDecision() */
                                             /**
@@ -57,7 +57,7 @@ PendSV_Handler:
                 SUB     R0, #1              /**< if R0 == 1, it will be 0 now */
                 CBZ     R0, .restore        /**< jump to '.restore' if decision is onlyRestore */
 
-                BL      pauseCurrentThread  /**< call Scheduler::pauseCurrentThread() */
+                BL      pauseActiveThread  /**< call Scheduler::pauseActiveThread() */
                                             /** 
                                             * R0 will contain return value (Thread *)
                                             * which is used as input argument to next procedure
@@ -65,7 +65,7 @@ PendSV_Handler:
                 BL      SaveContext         /**< call procedure: takes address of SP in R0! */
 
 .restore:
-                BL      runNextThread       /**< call Scheduler::runNextThread() return Thread* in R0 */
+                BL      activateNextThread  /**< call Scheduler::activateNextThread() return Thread* in R0 */
                 B       RestoreContext      /**< call procedure: takes address of SP in R0! */
                                             /**< Return from exception handler to new thread */
 .exit:

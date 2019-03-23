@@ -8,6 +8,7 @@ set(nuclearAbstractModulesHeadersPath ${nuclearPath}/headers)
 
 target_include_directories(
         nuclearAbstractModules
+    PUBLIC ${BOOST_DIR}
     PUBLIC ${nuclearAbstractModulesHeadersPath}
 )
 

@@ -19,41 +19,46 @@
 
 /* std */
 #include <vector>
-#include <iterator>
+#include <functional>
 
 namespace BossKernelUnitTests {
 
     class TimerQueueTest : public ::testing::Test {
 
-        protected:
+    protected:
 
-        TimerQueueTest() : dummyTask([](){ std::cout << "Dummy task"; }) {
+        TimerQueueTest() :
+            dummyTask([](){}) {
             
-            auto threadsCount = stacks.max_size();
-            threads.reserve(threadsCount);
+            threads.reserve(stacks.max_size());
             
-            for (int i = 0; i < threadsCount; ++i) {
+            for (int i = 0; i < threads.capacity(); ++i) {
                 
-                const auto& stackForThreadPtr = stacks.at(i).data();
-                const auto& stackSize = stacks.at(i).max_size();
-
-                threads.emplace_back(dummyTask, stackSize, stackForThreadPtr);
+                auto& stack = stacks.at(i);
+                threads.emplace_back(
+                        reinterpret_cast<Thread::TaskType>(
+                            dummyTask.target<void(*)(void)>()
+                            ),
+                        stack.max_size(),
+                        stack.data());
             }
         };
 
         std::function<void(void)> dummyTask;
 
-        std::array<std::array<uint32_t,16>,13> stacks;
+        static constexpr unsigned int threadsNumber = 13;
+
+        std::array<std::array<uint32_t,16>,threadsNumber> stacks;
         std::vector<Thread> threads;
         
         TimerQueue queue;
     };
 
-    TEST_F(TimerQueueTest, EmptyQueueNoExceptions) {
+    TEST_F(TimerQueueTest, EmptyQueueNoThrow) {
         
         ASSERT_NO_THROW(queue.popExpired());
         ASSERT_NO_THROW(queue.tick());
-        ASSERT_NO_THROW(queue.push(&threads[0], 3));
+        ASSERT_NO_THROW(queue.push(threads[0], 3));
     }
     
     TEST_F(TimerQueueTest, EmptyQueueValues) {
@@ -61,44 +66,44 @@ namespace BossKernelUnitTests {
         ASSERT_EQ(queue.popExpired(), nullptr);
     }
     
-    TEST_F(TimerQueueTest, OneThreadInQueueNoExceptions) {
+    TEST_F(TimerQueueTest, OneThreadInQueueNoThrow) {
 
-        queue.push(&threads[0], 6);
+        queue.push(threads[0], 6);
         
         ASSERT_NO_THROW(queue.popExpired());
         ASSERT_NO_THROW(queue.tick());
-        ASSERT_NO_THROW(queue.push(&threads[1], 3));
+        ASSERT_NO_THROW(queue.push(threads[1], 3));
     }
     
     TEST_F(TimerQueueTest, OneThreadInQueueExpired) {
     
-        const auto& threadPtr = &threads[0];
+        auto& thread = threads[0];
 
-        queue.push(threadPtr, 0);
-        ASSERT_EQ(queue.popExpired(), threadPtr);
-        queue.push(threadPtr, 0);
+        queue.push(thread, 0);
+        ASSERT_EQ(queue.popExpired(), &thread);
+        queue.push(thread, 0);
         queue.tick();
         queue.tick();
-        ASSERT_EQ(queue.popExpired(), threadPtr);
+        ASSERT_EQ(queue.popExpired(), &thread);
     }
     
     TEST_F(TimerQueueTest, OneThreadInQueueByTimer) {
     
-        const auto& threadPtr = &threads[0];
+        auto& thread = threads[0];
         
-        queue.push(threadPtr, 1);
+        queue.push(thread, 1);
         ASSERT_EQ(queue.popExpired(), nullptr);
         queue.tick();
-        ASSERT_EQ(queue.popExpired(), threadPtr);
+        ASSERT_EQ(queue.popExpired(), &thread);
         ASSERT_EQ(queue.popExpired(), nullptr);
     }
 
     TEST_F(TimerQueueTest, ExpiredThreadsInQueue) {
     
-        queue.push(&threads[0], 0);
-        queue.push(&threads[1], 0);
-        queue.push(&threads[2], 0);
-        queue.push(&threads[3], 2);
+        queue.push(threads[0], 0);
+        queue.push(threads[1], 0);
+        queue.push(threads[2], 0);
+        queue.push(threads[3], 2);
         ASSERT_EQ(queue.popExpired(), &threads[0]);
         queue.tick();
         ASSERT_EQ(queue.popExpired(), &threads[1]);
@@ -114,7 +119,7 @@ namespace BossKernelUnitTests {
 
             const auto& threadTimer = threadId*2;
         
-            queue.push(&threads[threadId], threadTimer);
+            queue.push(threads[threadId], threadTimer);
             
             for (int i = 0; i < threadTimer; ++i) {
             
@@ -128,11 +133,11 @@ namespace BossKernelUnitTests {
     
     TEST_F(TimerQueueTest, ManyThreadsInQueueByTimer) {
         
-        queue.push(&threads[3], 5);
-        queue.push(&threads[0], 1);
-        queue.push(&threads[11], 15);
-        queue.push(&threads[7], 6);
-        queue.push(&threads[4], 4);
+        queue.push(threads[3], 5);
+        queue.push(threads[0], 1);
+        queue.push(threads[11], 15);
+        queue.push(threads[7], 6);
+        queue.push(threads[4], 4);
         
         int i = 0;
         ASSERT_EQ(queue.popExpired(), nullptr);

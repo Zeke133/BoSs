@@ -1,8 +1,8 @@
 /**
  * @file    timerQueue.cpp
  * @author  Denis Homutovski
- * @version V1.0.0
- * @date    13-03-2019
+ * @version V1.0.1
+ * @date    17-03-2019
  * @brief   TimerQueue class
  * @details   Implementation of queue for thread timers
  * @pre       -
@@ -19,66 +19,62 @@
  * @param  needToSleep: amount of tick() after which timer must shout.
  * @retval None
  */
-void TimerQueue::push(Thread * newThread, unsigned int needToSleep) {
+void TimerQueue::push(Thread& newThread, unsigned int needToSleep) {
 
-    auto threadIterator = queueHead;
-    decltype(threadIterator) prevThreadIterator = nullptr;
-    
+    auto it = queue.begin();
+    auto prevIt = it;
     unsigned int sumSleepTicks = 0;
 
-    while (threadIterator != nullptr) {
+    const auto& endIt = queue.cend();
+    while (it != endIt) {
 
-        sumSleepTicks += threadIterator->getSleepTicks();
+        sumSleepTicks += (*it).getSleepTicks();
 
         if (needToSleep < sumSleepTicks) {
             break;
         }
 
-        prevThreadIterator = threadIterator;
-        threadIterator = threadIterator->getNext();
+        prevIt = it++;
     }
 
-    // update link in previous element
-    if (prevThreadIterator == nullptr) queueHead = newThread;
-    else prevThreadIterator->setNext(newThread);
+    if (it == endIt) {
 
-    // create link to next element
-    if (threadIterator == nullptr) {
-
-        newThread->setNext(nullptr);
-        newThread->setSleepTicks(needToSleep - sumSleepTicks);
+        newThread.setSleepTicks(needToSleep - sumSleepTicks);
+        queue.push_back(newThread);
     }
     else {
 
-        newThread->setNext(threadIterator);
-        newThread->setSleepTicks(needToSleep - (sumSleepTicks - threadIterator->getSleepTicks()));
+        if (it == prevIt) { // when inserting element on 1-st position
+            
+            newThread.setSleepTicks(needToSleep);
+            (*it).setSleepTicks(sumSleepTicks - needToSleep);
+            queue.push_front(newThread);
+        }
+        else {
 
-        // update next element timer
-        threadIterator->setSleepTicks(sumSleepTicks - needToSleep);
+            newThread.setSleepTicks(needToSleep - (sumSleepTicks - (*it).getSleepTicks()));
+            queue.insert_after(prevIt, newThread);
+            (*it).setSleepTicks(sumSleepTicks - needToSleep);
+        }
     }
 }
 
 /**
- * @brief  Decrement timers in queue.
+ * @brief  Decrement timers in queue. Need to be called each SysTick.
  * @retval None
  */
 void TimerQueue::tick() {
 
-    auto threadIterator = queueHead;
+    auto it = queue.begin();
+    while (it != queue.cend()) {
 
-    while (threadIterator != nullptr) {
-
-        auto threadSleepTicks = threadIterator->getSleepTicks();
-
+        auto threadSleepTicks = (*it).getSleepTicks();
         if (threadSleepTicks > 0) {
 
-            threadIterator->setSleepTicks(--threadSleepTicks);
-            break;
+            (*it).setSleepTicks(--threadSleepTicks);
+            return;
         }
-        else {
-
-            threadIterator = threadIterator->getNext();
-        }
+        it++;
     }
 }
 
@@ -90,11 +86,11 @@ void TimerQueue::tick() {
  */
 auto TimerQueue::popExpired() -> Thread * {
 
-    if (queueHead != nullptr && queueHead->getSleepTicks() == 0) {
+    if (!queue.empty() && queue.front().getSleepTicks() == 0) {
 
-        auto popHead = queueHead;
-        queueHead = queueHead->getNext();
-        return popHead;
+        auto frontPtr = &(queue.front());
+        queue.pop_front();
+        return frontPtr;
     }
     return nullptr;
 }

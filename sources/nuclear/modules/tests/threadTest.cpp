@@ -1,8 +1,8 @@
 /**
  * @file    threadTest.cpp
  * @author  Denis Homutovski
- * @version V1.0.1
- * @date    12-03-2019
+ * @version V1.0.2
+ * @date    17-03-2019
  * @brief   Thread class tests
  * @details   Unit tests
  * @pre       -
@@ -18,8 +18,7 @@
 #include <gtest/gtest.h>
 
 /* std */
-#include <vector>
-#include <iterator>
+#include <functional>
 
 namespace BossKernelUnitTests {
 
@@ -45,7 +44,13 @@ namespace BossKernelUnitTests {
 
         ThreadTest() :
             task([](){ /* Dummy task */ }),
-            thread(task, stack.max_size(), stack.data()) {};
+            thread(
+                    reinterpret_cast<Thread::TaskType>(
+                        task.target<void(*)(void)>()
+                        ),
+                    stack.max_size(),
+                    stack.data())
+        {};
 
         std::array<uint32_t,16> stack;
         std::function<void(void)> task;
@@ -57,27 +62,22 @@ namespace BossKernelUnitTests {
         EXPECT_EQ(thread.getState(), Thread::State::initialized);
     }
     
-    TEST_F(ThreadTest, LinkToNextInitialization) {
-
-        EXPECT_EQ(thread.getNext(), nullptr);
-    }
-    
-    TEST_F(ThreadTest, TopOfStackAccess) {
+    TEST_F(ThreadTest, StackPointerAccess) {
 
         // 16 words is initialized stack frame length
         *(std::end(stack)-16) = 2212;
 
-        ASSERT_EQ(*thread.getStackTop(), 2212);
+        ASSERT_EQ(*thread.getStackPointer(), 2212);
     }
 
     TEST_F(ThreadTest, StackFrameInitialization) {
 
         auto taskRawPointer = task.target<void(*)(void)>();
-        auto stackTop = std::end(stack);
+        auto sp = std::end(stack);
 
-        uint32_t xpsr = *--stackTop;
-        uint32_t pc = *--stackTop;
-        uint32_t lr = *--stackTop;
+        uint32_t xpsr = *--sp;
+        uint32_t pc = *--sp;
+        uint32_t lr = *--sp;
 
         EXPECT_EQ(xpsr, 0x21000000);
         ASSERT_EQ(pc, reinterpret_cast<uintptr_t>(taskRawPointer));
@@ -97,23 +97,20 @@ namespace BossKernelUnitTests {
         EXPECT_EQ(thread.getSleepTicks(), 0);
     }
 
-    TEST_F(ThreadTest, SetNext) {
-
-        Thread * nextThread = (Thread *)0x987654321;
-        
-        thread.setNext(nextThread);
-
-        EXPECT_EQ(thread.getNext(), (Thread *)0x987654321);
-    }
-
     TEST_F(ThreadTest, SetState) {
         
-        thread.setState(Thread::State::paused);
-        EXPECT_EQ(thread.getState(), Thread::State::paused);
-        thread.setState(Thread::State::running);
-        EXPECT_EQ(thread.getState(), Thread::State::running);
         thread.setState(Thread::State::initialized);
         EXPECT_EQ(thread.getState(), Thread::State::initialized);
+        thread.setState(Thread::State::waiting);
+        EXPECT_EQ(thread.getState(), Thread::State::waiting);
+        thread.setState(Thread::State::active);
+        EXPECT_EQ(thread.getState(), Thread::State::active);
+        thread.setState(Thread::State::sleep);
+        EXPECT_EQ(thread.getState(), Thread::State::sleep);
+        thread.setState(Thread::State::blocked);
+        EXPECT_EQ(thread.getState(), Thread::State::blocked);
+        thread.setState(Thread::State::killed);
+        EXPECT_EQ(thread.getState(), Thread::State::killed);
     }
 
 } /**< namespace UnitTests */

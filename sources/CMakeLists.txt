@@ -30,7 +30,13 @@ set_property(
         cmsis nuclearAbstractModules framework application
     APPEND
     PROPERTY
-        COMPILE_OPTIONS -Wall -ffreestanding --specs=nano.specs -ffunction-sections -fdata-sections
+        COMPILE_OPTIONS -Wall
+                        -ffreestanding
+                        --specs=nano.specs
+                        -ffunction-sections
+                        -fdata-sections
+                        -finline-small-functions
+                        -findirect-inlining
 )
 set_property(
     TARGET
@@ -47,7 +53,7 @@ endif()
 
 set_property(
     TARGET
-        nuclearAbstractModules framework application
+        nuclearAbstractModules nuclearAbstractModulesTests framework application
     PROPERTY
         COMPILE_FEATURES cxx_std_17
 )

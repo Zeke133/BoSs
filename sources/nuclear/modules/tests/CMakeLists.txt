@@ -20,6 +20,7 @@ target_link_libraries(
 target_include_directories(
         nuclearAbstractModulesTests
     PRIVATE ${GOOGLE_TEST_DIR}/googletest/include
+    PRIVATE ${BOOST_DIR}
     PRIVATE ${nuclearAbstractModulesHeadersPath}
 )
 

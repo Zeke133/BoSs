@@ -47,13 +47,13 @@ SECTIONS
 								/* Otherwise linking with --gc-sections flag will do it. */
 		
 		. = ALIGN(4);			/* Align current address pointer to 4 */
-		*(.text)				/* put here .text sections from all object files */
+		*(.text*)				/* put here .text sections from all object files */
 		
 		/* This section holds executable instructions that contribute to the process initialization code.
 		 * When a program starts to run, the system arranges to execute the code in this section
 		 * before calling the main program entry point (called main for C programs)
-		KEEP(*(.init))
 		*/
+		KEEP(*(.init))
 		/* This section holds executable instructions that contribute to the process termination code.
 		 * That is, when a program exits normally, the system arranges to execute the code in this section.
 		KEEP(*(.fini))
@@ -101,7 +101,7 @@ SECTIONS
     .rodata :
     {
         . = ALIGN(4);
-        *(.rodata)
+        *(.rodata*)
     } > ROM
 
     __etext = .;			/* define a global symbols at end of code */
@@ -126,11 +126,11 @@ SECTIONS
 		. = ALIGN(4);
 		/* This section holds an array of function pointers that contributes to a single
 		 * initialization array for the executable or shared object containing the section.
+		*/
 		PROVIDE_HIDDEN (__init_array_start = .);
 		KEEP(*(SORT(.init_array.*)))
 		KEEP(*(.init_array))
 		PROVIDE_HIDDEN (__init_array_end = .);
-		*/
 		. = ALIGN(4);
 		/* This section holds an array of function pointers that contributes to a single
 		 * termination array for the executable or shared object containing the section.
