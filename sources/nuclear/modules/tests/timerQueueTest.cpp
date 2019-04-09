@@ -112,6 +112,34 @@ namespace BossKernelUnitTests {
         ASSERT_EQ(queue.popExpired(), &threads[3]);
         ASSERT_EQ(queue.popExpired(), nullptr);
     }
+
+    TEST_F(TimerQueueTest, RemoveThreadsFromQueue) {
+    
+        queue.push(threads[0], 25);
+        queue.push(threads[1], 7);
+        queue.push(threads[2], 16);
+        queue.push(threads[3], 2);
+        queue.tick();                               // 1 tick gone
+        queue.remove(threads[3]);
+
+        for (int i = 0; i < 5; ++i) {
+            queue.tick();
+            ASSERT_EQ(queue.popExpired(), nullptr);
+        }
+        queue.tick();
+        ASSERT_EQ(queue.popExpired(), &threads[1]); // 7 ticks gone
+
+        queue.tick();                               // 8 ticks gone
+        queue.remove(threads[2]);
+
+        for (int i = 0; i < 16; ++i) {
+            queue.tick();
+            ASSERT_EQ(queue.popExpired(), nullptr);
+        }
+        queue.tick();
+        ASSERT_EQ(queue.popExpired(), &threads[0]); // 25 ticks gone
+        ASSERT_EQ(queue.popExpired(), nullptr);
+    }
     
     TEST_F(TimerQueueTest, OneThreadInQueueByTimerX) {
     

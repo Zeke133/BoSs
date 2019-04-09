@@ -74,8 +74,13 @@ There are two targets to copmile the project possible and handled with Cmake *CM
 - [x] target for libC or not? use standart libC and exceptions? **write manual**
 - [x] #pragma once use and delete uint32_t where is not needed
 - [x] look like wrong thread SP in PendSV- problem was in std::function
-- [ ] write unit tests of scheduler
-- [ ] SLEEPING threads queue
+- [x] Refactoring of PendSV - integrate pause and ctxt save to switchThread()
+- [x] write unit tests of scheduler
+- [x] **update time on delete from TimersQueue**
+- [ ] try to **simplify sleepSysCall**
+- [x] **rename svCallMock and proxy** classes
+- [x] SLEEPING threads queue
+- [ ] Context switch optimisation for 1 thread case
 - [ ] Thread SLEEP()
 - [ ] Mutex and semafore
 - [ ] cppCheck static analisis

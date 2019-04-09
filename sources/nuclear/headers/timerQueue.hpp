@@ -13,8 +13,6 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include "thread.hpp"
 
 /**
@@ -31,10 +29,9 @@ class TimerQueue {
 public:
 
     void push(Thread& newThread, unsigned int needToSleep);
-
     void tick();
-
     auto popExpired() -> Thread *;
+    void remove(Thread& t);
     
 private:
 

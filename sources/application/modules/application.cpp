@@ -15,6 +15,7 @@
 
 #include "thread.hpp"
 #include "scheduler.hpp"
+// #include "svCallApi.hpp"
 
 #include "led.hpp"
 #include "sysClock.hpp"
@@ -48,7 +49,9 @@ void printStr(const char *s) {
 void sysTickInit() {
 
     // 1.Program reload value.
-    *SYST_RVR = 0x0ffffff;   // 0x00000001-0x00FFFFFF. If the SysTick interrupt is required every 100 clock pulses, set RELOAD to 99.
+    *SYST_RVR = 0x11940;   // 0x00000001-0x00FFFFFF. If the SysTick interrupt is required every 100 clock pulses, set RELOAD to 99.
+    // 72000 - 0x11940
+    // 72000000 - 0x44AA200 - out of range
 
     // 2.Clear current value.
     *SYST_CVR = 0x0;          // A write of any value clears the field to 0, and also clears the SYST_CSR COUNTFLAG bit to 0.
@@ -93,18 +96,15 @@ void _start() {
     // priority of interrupts SysTick and PendSV
     main();
 
-    // switch to unprivileged and sleep? - or trigger ContextSwitch imideatly
+    // switch to unprivileged and sleep??? - or trigger ContextSwitch imideatly
 }
 #endif
 
 void SysTick_Handler(void) {
     
-    // timer stop
-    // *SYST_CSR = 0;
-
-    // Trigger the pendSV
-    *ICSR = 0x10000000; // [28]PENDSVSETRWPendSV set-pending bit.
-
+    // *SYST_CSR = 0;   // timer stop
+    Scheduler::tick();
+    *ICSR = 0x10000000; // [28]PENDSVSET - RW - PendSV set-pending bit.
 }
 
 /* Pre-main initialisation
@@ -116,16 +116,18 @@ void SystemInit(void) {
 #endif
 void main(void) {
 
-    volatile uint32_t thread1Stack[40];     // stack for thread 100x4=400 bytes
+    volatile uint32_t thread1Stack[40];
     volatile uint32_t thread2Stack[30];
-    volatile uint32_t thread3Stack[33];
+    // volatile uint32_t thread3Stack[33];
 
     const auto& task1 = []() {
         while(1) { 
         #ifdef QEMU_DUMMY
             printStr("TASK1\n");
+            // Scheduler::sleep(5);
         #else
             LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_13);
+            Scheduler::sleep(1);
         #endif
         }
     };
@@ -135,17 +137,18 @@ void main(void) {
             printStr("task2\n");
         #else
             LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_13);
+            Scheduler::sleep(1);
         #endif
         }
     };
 
     Thread thread1(task1, (sizeof thread1Stack)/4, (uint32_t *)&thread1Stack);
     Thread thread2(task2, (sizeof thread2Stack)/4, (uint32_t *)&thread2Stack);
-    Thread thread3(task1, (sizeof thread3Stack)/4, (uint32_t *)&thread3Stack);
+    // Thread thread3(task1, (sizeof thread3Stack)/4, (uint32_t *)&thread3Stack);
 
-    Scheduler::addThread(thread1);
-    Scheduler::addThread(thread2);
-    Scheduler::addThread(thread3);
+    Scheduler::run(thread1);
+    Scheduler::run(thread2);
+    // Scheduler::run(thread3);
 
     #ifndef QEMU_DUMMY
     SystemClock::setClockTo72Mhz();
@@ -154,7 +157,7 @@ void main(void) {
     LED led(GPIOC, LL_GPIO_PIN_13);
     led.on();
 
-    // where to place?
+    // where to place???
     sysTickInit();
 
     while(1);

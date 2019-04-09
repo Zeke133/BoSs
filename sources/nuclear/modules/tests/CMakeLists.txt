@@ -27,11 +27,11 @@ target_include_directories(
 target_sources(
         nuclearAbstractModulesTests
     PRIVATE ${nuclearAbstractModulesPath}/thread
-    PRIVATE ${nuclearAbstractModulesPath}/scheduler
     PRIVATE ${nuclearAbstractModulesPath}/timerQueue
+    PRIVATE ${nuclearAbstractModulesPath}/scheduler
     PRIVATE threadTest
-    PRIVATE schedulerTest
     PRIVATE timerQueueTest
+    PRIVATE schedulerTest
     PRIVATE runAllTests
 )
 

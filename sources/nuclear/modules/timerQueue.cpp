@@ -15,8 +15,8 @@
 
 /**
  * @brief  Push timer to queue.
- * @param  newThread: pointer to thread which need to be timed-out
- * @param  needToSleep: amount of tick() after which timer must shout.
+ * @param  Thread&: reference to thread which need to be timed-out
+ * @param  unsigned int: amount of tick() after which timer must shout.
  * @retval None
  */
 void TimerQueue::push(Thread& newThread, unsigned int needToSleep) {
@@ -82,7 +82,7 @@ void TimerQueue::tick() {
  * @brief  Pop expired thread from queue. It will be removed from queue.
  *         Can return only one thread, so must be called untill no any expired threads
  *         will remain in queue.
- * @retval 'Thread *' pointer to expired thread or 'nullptr' if no any expired thread in queue.
+ * @retval Thread *: pointer to expired thread or 'nullptr' if no any expired thread in queue.
  */
 auto TimerQueue::popExpired() -> Thread * {
 
@@ -95,3 +95,28 @@ auto TimerQueue::popExpired() -> Thread * {
     return nullptr;
 }
 
+/**
+ * @brief  Remove thread from queue. Timings for other threads in queue
+ *         have to remain correct.
+ * @param  Thread&: reference to thread which need to be timed-out
+ * @retval None.
+ */
+void TimerQueue::remove(Thread& t) {
+
+    if (t != queue.back()) {
+
+        auto it = queue.begin();
+        while (it != queue.cend()) {
+
+            if (*it == t) break;
+            it++;
+        }
+        if (it != queue.cend()) {
+
+            it++;
+            auto& nextT = *it;
+            nextT.setSleepTicks(nextT.getSleepTicks() + t.getSleepTicks());
+        }
+    }
+    queue.remove(t);
+}

@@ -14,104 +14,138 @@
 #include "scheduler.hpp"
 
 ThreadList Scheduler::normalQueue;
+TimerQueue Scheduler::sleepingQueue;
 Thread * Scheduler::activeThreadPtr = nullptr;
-Thread * Scheduler::nextThreadPtr = nullptr;
 
 /**
  * @brief  Thread scheduling algorithm implementation
  * @param  None
- * @retval Scheduler::Decision - decision about need for thread switch
+ * @retval Thread * - pointer to thread SP to be restored or nullptr
  */
-Scheduler::Decision Scheduler::takeDecision() {
+auto Scheduler::switchThread() -> Thread * {
 
     // Check timers/sleeping/blocked
-
-    if (normalQueue.empty()) {
+    {
+        auto awakeThread = sleepingQueue.popExpired();
         
-        return Decision::noAction;
-    }
-    else {
+        while (awakeThread != nullptr) {
 
-        nextThreadPtr = &normalQueue.front();
+            normalQueue.push_back(*awakeThread);
+            awakeThread = sleepingQueue.popExpired();
+        }
+    }
+
+    if (!normalQueue.empty()) {
+
+        auto nextThreadPtr = &normalQueue.front();
         normalQueue.pop_front();
 
-        if (activeThreadPtr == nullptr && nextThreadPtr->getState() == Thread::State::initialized) {
-            /**
-             * Has to happen just once for 1st thread on system start.
-             */
-            return Decision::onlyRestore;
+        if (activeThreadPtr != nullptr) {
+
+            pauseActiveThread();
+            normalQueue.push_back(*activeThreadPtr);
+            SaveContext(activeThreadPtr);
         }
 
-        return Decision::saveAndRestore;
+        setActiveThread(nextThreadPtr);
+        return activeThreadPtr;
+
+    } else {
+        
+        if (activeThreadPtr != nullptr) {
+            // return to Thread PSP
+            // this code can be optimized
+            // here is no need to save and restore same context
+            SaveContext(activeThreadPtr);
+            return activeThreadPtr;
+        }
+        // return to Thread MSP
+        return nullptr;
     }
 }
 
 /**
- * @brief  Set current active thread to Thread::State::waiting.
- *         Used directly from asembler context switcher.
+ * @brief  Set active thread to Thread::State::waiting
+ *         and push it to the back of queue.
  * @param  None
- * @retval Thread * - current thread pointer
+ * @retval None
  */
-Thread * Scheduler::pauseActiveThread() {
+void Scheduler::pauseActiveThread() {
 
     activeThreadPtr->setState(Thread::State::waiting);
-    normalQueue.push_back(*activeThreadPtr);
-    return activeThreadPtr;
 }
 
 /**
- * @brief  Step to next scheduled thread and
- *         set state to Thread::State::active.
- *         Used directly from asembler context switcher.
- * @param  None
- * @retval Thread * - current thread pointer
+ * @brief  Set state to Thread::State::active.
+ * @param  Thread * - next thread pointer
+ * @retval None
  */
-Thread * Scheduler::activateNextThread() {
+void Scheduler::setActiveThread(Thread * nextThreadPtr) {
 
     activeThreadPtr = nextThreadPtr;
     activeThreadPtr->setState(Thread::State::active);
-    return activeThreadPtr;
 }
 
 /**
- * @brief  Get pointer to current active thread instance
+ * @brief  Set active thread to Thread::State::sleep
+ *         and push it to the sleeping threads queue.
+ *         Used directly from asembler SVCall.
  * @param  None
- * @retval Thread * - current active thread pointer or nullptr
+ * @retval Thread * - current thread pointer
  */
-auto Scheduler::getActiveThread(void) -> Thread * {
+auto Scheduler::sleepActiveThread() -> Thread * {
 
-    return activeThreadPtr;
+    auto t = activeThreadPtr;
+    activeThreadPtr = nullptr;
+    sleepingQueue.push(*t, t->getSleepTicks());
+    t->setState(Thread::State::sleep);
+    return t;
 }
 
 /**
- * 
- * 
- * @brief  Add new thread.
+ * @brief  Add thread to execution queue.
  * @param  Thread& - thread to add
  * @retval None
  */
-void Scheduler::addThread(Thread& newThread) {
+void Scheduler::run(Thread& newThread) {
 
     normalQueue.push_back(newThread);
 }
 
 /**
- * 
- * 
  * @brief  Kill thread.
  * @param  Thread& - thread to kill
  * @retval None
  */
 void Scheduler::kill(Thread& thread) {
 
-    if (activeThreadPtr == &thread) {
+    thread.setState(Thread::State::killed);
 
-        // self kill!
-        thread.setState(Thread::State::killed);
+    if (activeThreadPtr == &thread) {   // self kill!
+
+        activeThreadPtr = nullptr;
         // call some systemCall to schedule to next thread
+        // without currentThread context save ???
     }
     else {
 
+        // check where delete from ???
         normalQueue.remove(thread);
+        sleepingQueue.remove(thread);
     }
 }
+
+/**
+ * @brief  Sleep current thread for amount of miliseconds
+ * @param  unsigned int ms - miliseconds to sleep
+ * @retval Thread * - current active thread pointer or nullptr
+ */
+void Scheduler::sleep(unsigned int ms) {
+
+    auto t = Scheduler::getActiveThread();
+    if (t != nullptr) {
+
+        t->setSleepTicks(ms);
+        svCallSleep();
+    }
+};

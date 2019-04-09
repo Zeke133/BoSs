@@ -3,7 +3,7 @@
  * @author  Denis Homutovski
  * @version V1.0.1
  * @date    21-02-2019
- * @brief   Procedures of context switch.
+ * @brief   BoSs procedures of context switch.
  * @details   ARM Cortex-M3.
  *            ------------
  *            Example of hardware stack frame saved/restored on interrupt entering:

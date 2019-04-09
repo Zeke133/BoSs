@@ -15,6 +15,7 @@ target_include_directories(
 target_sources(
         nuclearAbstractModules
     PRIVATE thread
+    PRIVATE timerQueue
     PRIVATE scheduler
 )
 

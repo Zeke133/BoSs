@@ -28,7 +28,7 @@ public:
 
     typedef void (*TaskType)(void);     /**< Thread task function type */
     
-    enum class State : uint8_t {        /**< Enumeration of thread states */
+    enum class State {      /**< Enumeration of thread states */
 
         initialized = 0,    /**< new thread initialized and ready to run */
         waiting,            /**< waiting in queue */
@@ -49,8 +49,12 @@ public:
     auto getSleepTicks() { return sleepTicks; };
     void setSleepTicks(uint32_t ticks) { this->sleepTicks = ticks; };
 
-    bool operator==(const Thread& t) const { return stackPointer == t.stackPointer; }
+    auto operator==(const Thread& t) const { return stackPointer == t.stackPointer; }
+    auto operator!=(const Thread& t) const { return !(*this == t); }
 
+    // join()
+    // wait()
+    
 private:
 
     uint32_t * stackPointer;            /**< must be on first place! used from asembler */

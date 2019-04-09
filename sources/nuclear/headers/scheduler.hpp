@@ -13,9 +13,11 @@
 
 #pragma once
 
-#include <cstdint>
-
 #include "thread.hpp"
+#include "timerQueue.hpp"
+#include "svCallApi.hpp"
+
+class SchedulerTestProxy;   /**< Used for private API Unit-tests */
 
 /**
  * Class implement kernel threads scheduling algorithm.
@@ -23,42 +25,35 @@
  */
 class Scheduler {
 
+friend SchedulerTestProxy;
+
 public:
 
-    /**
-     * Specifies decisions of scheduler to be fulfilled in interrupt handler
-     */
-    enum class Decision : uint8_t {
-        noAction = 0,       /**< context switch is not needed */
-        onlyRestore = 1,    /**< context just need to be restored from thread stack */
-        saveAndRestore = 2  /**
-                             * need to save current context
-                             * switch current thread pointer to next thread scheduled
-                             * and restore new context
-                             */
-    };
-
-    static void addThread(Thread& newThread);
+    // user API part
+    static void run(Thread& newThread);
     static void kill(Thread& thread);
+    static void sleep(unsigned int ms);
 
-    static auto takeDecision(void) -> Decision; /**< Used from ASM context switch procedure */
-    static auto getActiveThread(void) -> Thread * ;
-
-    // join()
-    // wait()
+    // system API part
+    static void tick() { sleepingQueue.tick(); };           /**< Used with SysTick */
 
 private:
 
-    static Thread * pauseActiveThread(void);    /**< Used from ASM context switch procedure */
-    static Thread * activateNextThread(void);   /**< Used from ASM context switch procedure */
+    // system API part used mostly from ASM procedures
+    // and made private to hide from user
+    static auto switchThread() -> Thread *;                 /**< Used with ASM PendSV */
+    static auto sleepActiveThread() -> Thread *;            /**< Used with ASM SVCall */
+    static auto getActiveThread() { return activeThreadPtr; };
+    // internal usage
+    static void pauseActiveThread();                        /**< Used with switchThread() */
+    static void setActiveThread(Thread * nextThreadPtr);    /**< Used with switchThread() */
 
+    // prioritized ?
     static ThreadList normalQueue;              /**< boost::intrusive slist */
-
-    static Thread * activeThreadPtr;            /**< Current active thread pointer */
-    static Thread * nextThreadPtr;              /**< Next thread to be executed pointer */
-
-    // ActiveThreadsQueue - prioritized?
-    // SleepingThreadsQueue
+    static TimerQueue sleepingQueue;            /**< Sleeping threads queue */
     // TimersQueue - Make HIGHEST priority and use just for really short procedures
     // BlockedThreadsQueue - mutex/semafore and s.o.
+
+    static Thread * activeThreadPtr;            /**< Current active thread pointer */
+
 };

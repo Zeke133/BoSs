@@ -3,7 +3,7 @@
  * @author  Denis Homutovski
  * @version V1.0.0
  * @date    02-09-2019
- * @brief   ARM Cortex-M3 startup code
+ * @brief   BoSs ARM Cortex-M3 startup code
  * @details   Bare metal initalization code.
               Initialize Vector table, load BSS and DATA segments to RAM.
               Implement Reset_Handler and Default_Handler.
