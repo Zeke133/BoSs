@@ -1,31 +1,8 @@
 # ---
-# BoSs peripheral framework
+# BoSs framework
 # ---
-# External Libs
-set(stmDriverHeadersPath ${PROJECT_SOURCE_DIR}/libs/STM32F1xx_LL_Driver/inc)
-# Framework
 set(frameworkPath ${PROJECT_SOURCE_DIR}/sources/framework)
-set(frameworkModulesPath ${frameworkPath}/modules)
-set(frameworkHeadersPath ${frameworkPath}/headers)
+set(frameworkInterfacesPath ${frameworkPath}/interfaces)
 
-add_library(framework OBJECT)
-
-target_link_libraries(
-        framework
-    PUBLIC cmsis
-    PUBLIC nuclearHardwareModules
-    PUBLIC nuclearAbstractModules
-)
-
-target_include_directories(
-        framework
-    PUBLIC ${stmDriverHeadersPath}
-    PUBLIC ${frameworkHeadersPath}
-)
-
-target_sources(
-        framework
-    PRIVATE ${frameworkModulesPath}/gpio
-    PRIVATE ${frameworkModulesPath}/led
-    PRIVATE ${frameworkModulesPath}/sysClock
-)
+add_subdirectory(peripheral)        # internal peripheral devices drivers
+add_subdirectory(utils)             # hardware independent utils

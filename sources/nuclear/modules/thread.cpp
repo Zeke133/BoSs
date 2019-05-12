@@ -20,7 +20,6 @@
  * @param  allocatedStack: pointer to memory allocated for thread stack 
  * @retval None
  */
-
 Thread::Thread(TaskType task, uint32_t stackSizeWords, uint32_t * allocatedStack) {
 
     /**

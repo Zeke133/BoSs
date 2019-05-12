@@ -53,6 +53,7 @@ set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -Os")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -Os")
 # ------------------------------------------------------------
 add_subdirectory(libs/cmsis)
+add_subdirectory(libs/STM32F1xx_LL_Driver)
 add_subdirectory(sources/nuclear)
 add_subdirectory(sources/framework)
 add_subdirectory(sources/application)
@@ -64,11 +65,16 @@ target_link_libraries(
         boss.elf
     PRIVATE nuclearHardwareModules
     PRIVATE nuclearAbstractModules
-    PRIVATE framework
+    PRIVATE frameworkPeripheral
+    PRIVATE frameworkUtils
     PRIVATE application
 )
 if(NOT use_qemu_dummies)
-    target_link_libraries(boss.elf PRIVATE cmsis)
+    target_link_libraries(
+            boss.elf
+        PRIVATE cmsis
+        PRIVATE stmLL
+    )
 endif()
 set_target_properties(
         boss.elf

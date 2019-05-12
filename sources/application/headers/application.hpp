@@ -15,4 +15,15 @@
 
 #include <cstdint>
 
+#include "IBitBanding.hpp"
+
+#include "thread.hpp"
+#include "scheduler.hpp"
+
+#include "delay.hpp"
+#include "led.hpp"
+#include "sysClock.hpp"
+#include "dma.hpp"
+#include "uart.hpp"
+
 using std::uint32_t;

@@ -9,7 +9,8 @@ add_library(application OBJECT)
 
 target_link_libraries(
         application
-    PUBLIC framework
+    PUBLIC frameworkUtils
+    PUBLIC frameworkPeripheral
 )
 
 target_include_directories(

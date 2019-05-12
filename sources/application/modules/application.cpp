@@ -13,13 +13,6 @@
 
 #include "application.hpp"
 
-#include "thread.hpp"
-#include "scheduler.hpp"
-// #include "svCallApi.hpp"
-
-#include "led.hpp"
-#include "sysClock.hpp"
-
 extern void main(void);
 
 // SysTick timer
@@ -116,9 +109,25 @@ void SystemInit(void) {
 #endif
 void main(void) {
 
-    volatile uint32_t thread1Stack[40];
-    volatile uint32_t thread2Stack[30];
-    // volatile uint32_t thread3Stack[33];
+    #ifndef QEMU_DUMMY
+    SystemClock::setClockTo72Mhz();
+    #endif
+
+    Delay delay;
+    LED led(GPIOC, LL_GPIO_PIN_13);
+    led.on();
+    delay.us(100000);
+    led.off();
+    delay.us(100000);
+    led.on();
+
+    auto dma = DMA::make_dma<DMA::Device::USART1_TX>();
+    auto uart = Uart::make_uart<1>(dma);
+    
+    uart.puts("start");
+
+    uint32_t thread1Stack[1000];
+    // uint32_t thread2Stack[30];
 
     const auto& task1 = []() {
         while(1) { 
@@ -126,39 +135,32 @@ void main(void) {
             printStr("TASK1\n");
             // Scheduler::sleep(5);
         #else
+            
             LL_GPIO_ResetOutputPin(GPIOC, LL_GPIO_PIN_13);
             Scheduler::sleep(1);
         #endif
         }
     };
-    const auto& task2 = []() {
-        while(1) { 
-        #ifdef QEMU_DUMMY
-            printStr("task2\n");
-        #else
-            LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_13);
-            Scheduler::sleep(1);
-        #endif
-        }
-    };
+    // const auto& task2 = []() {
+    //     while(1) { 
+    //     #ifdef QEMU_DUMMY
+    //         printStr("task2\n");
+    //     #else
+    //         LL_GPIO_SetOutputPin(GPIOC, LL_GPIO_PIN_13);
+    //         Scheduler::sleep(1);
+    //     #endif
+    //     }
+    // };
 
     Thread thread1(task1, (sizeof thread1Stack)/4, (uint32_t *)&thread1Stack);
-    Thread thread2(task2, (sizeof thread2Stack)/4, (uint32_t *)&thread2Stack);
-    // Thread thread3(task1, (sizeof thread3Stack)/4, (uint32_t *)&thread3Stack);
+    // Thread thread2(task2, (sizeof thread2Stack)/4, (uint32_t *)&thread2Stack);
 
     Scheduler::run(thread1);
-    Scheduler::run(thread2);
-    // Scheduler::run(thread3);
-
-    #ifndef QEMU_DUMMY
-    SystemClock::setClockTo72Mhz();
-    #endif
-
-    LED led(GPIOC, LL_GPIO_PIN_13);
-    led.on();
+    // Scheduler::run(thread2);
 
     // where to place???
-    sysTickInit();
+    // Configure the SysTick timer to overflow every 1 ms
+    SysTick_Config(SystemCoreClock / 1000);
 
     while(1);
     

@@ -4,6 +4,7 @@
 # Targets:
 #   boss.elf
 # - cmsis
+# - stmLL
 # - nuclearHardwareModules
 # - nuclearAbstractModules
 # - framework
@@ -12,7 +13,13 @@
 # Compile options common for all targets ASM/C/C++
 set_property(
     TARGET
-        nuclearHardwareModules cmsis nuclearAbstractModules framework application
+        nuclearHardwareModules
+        cmsis
+        stmLL
+        nuclearAbstractModules
+        frameworkPeripheral
+        frameworkUtils
+        application
     PROPERTY
         COMPILE_OPTIONS -march=armv7-m -mcpu=cortex-m3 -mthumb -mlittle-endian
 )
@@ -27,7 +34,12 @@ endif()
 
 set_property(
     TARGET
-        cmsis nuclearAbstractModules framework application
+        cmsis
+        stmLL
+        nuclearAbstractModules
+        frameworkPeripheral
+        frameworkUtils
+        application
     APPEND
     PROPERTY
         COMPILE_OPTIONS -Wall
@@ -40,7 +52,10 @@ set_property(
 )
 set_property(
     TARGET
-        nuclearAbstractModules framework application
+        nuclearAbstractModules
+        frameworkPeripheral
+        frameworkUtils
+        application
     APPEND
     PROPERTY
         COMPILE_DEFINITIONS ${COMPILE_DEFINES}
@@ -53,13 +68,21 @@ endif()
 
 set_property(
     TARGET
-        nuclearAbstractModules nuclearAbstractModulesTests framework application
+        nuclearAbstractModules
+        nuclearAbstractModulesTests
+        frameworkPeripheral
+        frameworkUtils
+        frameworkUtilsTests
+        application
     PROPERTY
         COMPILE_FEATURES cxx_std_17
 )
 set_property(
     TARGET
-        nuclearAbstractModules framework application
+        nuclearAbstractModules
+        frameworkPeripheral
+        frameworkUtils
+        application
     APPEND
     PROPERTY
         COMPILE_OPTIONS ${COMPILE_OPTIONS_FLAGS}

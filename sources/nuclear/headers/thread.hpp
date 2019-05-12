@@ -26,7 +26,7 @@ class Thread {
 
 public:
 
-    typedef void (*TaskType)(void);     /**< Thread task function type */
+    using TaskType = void (*)(void);    /**< Thread task function type */
     
     enum class State {      /**< Enumeration of thread states */
 
@@ -77,5 +77,5 @@ public:
 };
 
 /** Define an slist that will store Thread using the public member hook */
-typedef member_hook <Thread, slist_member_hook<>, &Thread::slist_hook_> ThreadSlistMemberOption;
-typedef slist <Thread, ThreadSlistMemberOption, cache_last <true>> ThreadList;
+using ThreadSlistMemberOption = member_hook <Thread, slist_member_hook<>, &Thread::slist_hook_>;
+using ThreadList = slist <Thread, ThreadSlistMemberOption, cache_last <true>>;

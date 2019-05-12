@@ -21,6 +21,16 @@
  */
 namespace GPIO {
 
+/**
+ * @brief  Enable APB2 clock for specified port.
+ * @param  port GPIO Port
+ *         GPIOA
+ *         GPIOB
+ *         GPIOC
+ *         GPIOD
+ *         GPIOE
+ * @retval None
+ */
 void enableAPB2Clock(GPIO_TypeDef * port);
 
 /**

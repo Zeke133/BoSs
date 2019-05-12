@@ -14,11 +14,8 @@
 #include "sysClock.hpp"
 
 /**
- * @brief  LED class constructor
- *         Initialize APB2 clock and setup port.
- *         Set LED ON
- * @param  port GPIO Port
- * @param  pin to be used
+ * @brief  Set system core source to use external 8Mhz crystal
+ *         and set system clock to 72Mhz
  * @retval None
  */
 void SystemClock::setClockTo72Mhz(void) {

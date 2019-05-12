@@ -13,16 +13,6 @@
 
 #include "gpio.hpp"
 
-/**
- * @brief  Enable APB2 clock for specified port.
- * @param  port GPIO Port
- *         GPIOA
- *         GPIOB
- *         GPIOC
- *         GPIOD
- *         GPIOE
- * @retval None
- */
 void GPIO::enableAPB2Clock(GPIO_TypeDef * port) {
 
     uint32_t APB2_Periph;

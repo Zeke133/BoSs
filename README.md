@@ -82,10 +82,11 @@ There are two targets to copmile the project possible and handled with Cmake *CM
 - [x] SLEEPING threads queue
 - [ ] Context switch optimisation for 1 thread case
 - [ ] Thread SLEEP()
+- [ ] Divide to namespaces
 - [ ] Mutex and semafore
 - [ ] cppCheck static analisis
 - [ ] Self test with semafore and poling systimer
 - [ ] Make user treads to run in Unprivileged mode and one thread for kernel tasks. Run user main() from _init. before this go to PSP unprivileged mode.
 - [ ] Stack Overflow detection by "endmarks"
-- [ ] try to delete dependencies to LL lib .cpp and other trash
-- [ ] delete from Framework headers #includes of STM LL and CMSIS. Make them pure interface headers. This will require some atribute types redefinition.
+- [ ] ~~try to delete dependencies to LL lib .cpp and other trash~~
+- [ ] ~~delete from Framework headers #includes of STM LL and CMSIS. Make them pure interface headers. This will require some atribute types redefinition.~~
