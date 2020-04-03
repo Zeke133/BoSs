@@ -13,6 +13,8 @@
 
 #include "ostream.hpp"
 
+using Convertation::itoa;
+
 /**
  * @brief  Output stream configuration.
  * @param  manipulator: dec - decimal output; hex - hexadecimal.
@@ -35,34 +37,34 @@ OStream& OStream::operator<<(enum OutSet manipulator) {
 };
 
 OStream& OStream::operator<<(char symbol) {
-    device.putc(symbol);
+    outputDevice.putc(symbol);
     return *this;
 };
 
 OStream& OStream::operator<<(const char * cString) {
-    device.puts(cString);
+    outputDevice.puts(cString);
     return *this;
 };
 
 OStream& OStream::operator<<(uint8_t num) {
-    device.puts(itoa(num, outputNumbersBase));
+    outputDevice.puts(itoa(num, outputNumbersBase));
     return *this;
 };
 OStream& OStream::operator<<(uint16_t num) {
-    device.puts(itoa(num, outputNumbersBase));
+    outputDevice.puts(itoa(num, outputNumbersBase));
     return *this;
 };
 OStream& OStream::operator<<(int16_t num) {
-    if (num < 0) device.putc('-');
-    device.puts(itoa(num, outputNumbersBase));
+    if (num < 0) outputDevice.putc('-');
+    outputDevice.puts(itoa(num, outputNumbersBase));
     return *this;
 };
 OStream& OStream::operator<<(uint32_t num) {
-    device.puts(itoa(num, outputNumbersBase));
+    outputDevice.puts(itoa(num, outputNumbersBase));
     return *this;
 };
 OStream& OStream::operator<<(int32_t num) {
-    if (num < 0) device.putc('-');
-    device.puts(itoa(num, outputNumbersBase));
+    if (num < 0) outputDevice.putc('-');
+    outputDevice.puts(itoa(num, outputNumbersBase));
     return *this;
 };

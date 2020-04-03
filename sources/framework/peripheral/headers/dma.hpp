@@ -222,7 +222,7 @@ public:
         return DMA(conf.controller, conf.channel, conf.direction, conf.irqN);
     };
 
-    void runTransfer(void * perephPtr, const char * memoryPtr, unsigned int size) const;
+    void runTransfer(void * perephPtr, const uint8_t * memoryPtr, uint32_t size) const;
     void setCallbackOnTransferComplete(CallbackFunc func) const;
 
     DMA(const DMA&) = delete;               /**< Delete copy constructor. */

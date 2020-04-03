@@ -1,7 +1,13 @@
 {
-    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
     "cmake.configureOnOpen": false,
-    "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
+    "cmake.configureArgs": [
+        "-DCMAKE_TOOLCHAIN_FILE=toolchain.cmake"
+    ],
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+    "C_Cpp.default.cppStandard": "c++17",
+    "C_Cpp.default.cStandard": "c11",
+    "C_Cpp.default.intelliSenseMode": "gcc-x64",
+    "C_Cpp.errorSquiggles": "Disabled",
     "files.associations": {
         "functional": "cpp",
         "algorithm": "cpp",
@@ -45,10 +51,8 @@
         "xstring": "cpp",
         "xtr1common": "cpp",
         "xutility": "cpp",
-        "iterator": "cpp"
-    },
-    "C_Cpp.default.cppStandard": "c++17",
-    "C_Cpp.default.cStandard": "c11",
-    "C_Cpp.default.intelliSenseMode": "gcc-x64",
-    "C_Cpp.errorSquiggles": "Disabled"
+        "iterator": "cpp",
+        "array": "cpp",
+        "string_view": "cpp"
+    }
 }

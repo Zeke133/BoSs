@@ -56,12 +56,12 @@ public:
      * @param  parity: LL_USART_PARITY_NONE
      * @retval Uart instance
      */
-    template<int uartN>
+    template<uint8_t uartN>
     static constexpr auto make_uart(DMA& txDMA,
-                                uint32_t bauld = 115200,
-                                uint32_t dataBits = LL_USART_DATAWIDTH_8B,
-                                uint32_t stopBits = LL_USART_STOPBITS_1,
-                                uint32_t parity = LL_USART_PARITY_NONE) {
+                                    uint32_t bauld = 115200,
+                                    uint32_t dataBits = LL_USART_DATAWIDTH_8B,
+                                    uint32_t stopBits = LL_USART_STOPBITS_1,
+                                    uint32_t parity = LL_USART_PARITY_NONE) {
         
         /**
          * Table of device configurations.
@@ -79,12 +79,12 @@ public:
 
     void configUart(uint32_t baud, uint32_t dataBits, uint32_t stopBits, uint32_t parity);
 
-    void putsAsync(const char * string, unsigned short len = 0);
+    void putsAsync(const char * cstr, uint16_t len = 0);
     void putc(char byte);
-    void puts(const char *str);
+    void puts(const char * cstr);
 
-    auto rcvGetCount(void) -> unsigned short;
-    auto rcvGetData(void) -> char *;
+    auto rcvGetCount(void) -> uint16_t;
+    auto rcvGetData(void) -> uint8_t *;
     void rcvClear(void);
 
     Uart(const Uart&) = delete;             /**< Delete copy constructor. */
@@ -113,20 +113,20 @@ private:
           uint32_t parity);
 
     
-    static constexpr int buffersSize = 100; /**< Internal buffers size */
+    static constexpr size_t buffersSize = 100;  /**< Internal buffers size */
     DMA& txDMA;                     /**< Reference to used dma instance */
     const Config conf;              /**< USART device configuration */
 
-    std::array<char, buffersSize> outputBuffer;
-    std::array<char, buffersSize> inputBuffer;
-    unsigned short inputBufCnt = 0;
+    std::array<uint8_t, buffersSize> outputBuffer;
+    std::array<uint8_t, buffersSize> inputBuffer;
+    uint16_t inputBufCnt = 0;
 
     // static pointers for interrupt handlers
-    static volatile char * uart1InBufPtr;
-    static volatile char * uart2InBufPtr;
-    static volatile char * uart3InBufPtr;
-    static volatile unsigned short * uart1InBufCntPtr;
-    static volatile unsigned short * uart2InBufCntPtr;
-    static volatile unsigned short * uart3InBufCntPtr;
+    static volatile uint8_t * uart1InBufPtr;
+    static volatile uint8_t * uart2InBufPtr;
+    static volatile uint8_t * uart3InBufPtr;
+    static volatile uint16_t * uart1InBufCntPtr;
+    static volatile uint16_t * uart2InBufCntPtr;
+    static volatile uint16_t * uart3InBufCntPtr;
 
 };

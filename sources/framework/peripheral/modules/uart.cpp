@@ -16,12 +16,12 @@
 /**
  * Static pointers to internal buffers for interrupt handlers
  */
-volatile char * Uart::uart1InBufPtr = 0;
-volatile char * Uart::uart2InBufPtr = 0;
-volatile char * Uart::uart3InBufPtr = 0;
-volatile unsigned short * Uart::uart1InBufCntPtr = 0;
-volatile unsigned short * Uart::uart2InBufCntPtr = 0;
-volatile unsigned short * Uart::uart3InBufCntPtr = 0;
+volatile uint8_t * Uart::uart1InBufPtr = 0;
+volatile uint8_t * Uart::uart2InBufPtr = 0;
+volatile uint8_t * Uart::uart3InBufPtr = 0;
+volatile uint16_t * Uart::uart1InBufCntPtr = 0;
+volatile uint16_t * Uart::uart2InBufCntPtr = 0;
+volatile uint16_t * Uart::uart3InBufCntPtr = 0;
 
 /**
  * Interrupt handlers
@@ -153,14 +153,14 @@ void Uart::putc(char byte) {
 
 /**
  * @brief  Transmit null terminated C-string.
- * @param  str: pointer to C-string
+ * @param  cstr: pointer to C-string
  * @retval None
  */
-void Uart::puts(const char *str) {
+void Uart::puts(const char * cstr) {
 
-    while (*str) {
+    while (*cstr) {
         while(!LL_USART_IsActiveFlag_TXE(conf.uartPort)) ;
-        LL_USART_TransmitData8(conf.uartPort, *str++);
+        LL_USART_TransmitData8(conf.uartPort, *cstr++);
     }
     while(!LL_USART_IsActiveFlag_TC(conf.uartPort)) ;
 }
@@ -175,21 +175,21 @@ void Uart::puts(const char *str) {
  *         or length of bytes to transmit
  * @retval None
  */
-void Uart::putsAsync(const char * data, unsigned short len) {
+void Uart::putsAsync(const char * cstr, uint16_t len) {
 
     while(!LL_USART_IsActiveFlag_TC(conf.uartPort)) ;
     
     if (len == 0) {
 
-        for( ; data[len] != 0; ++len) {
+        for( ; cstr[len] != 0; ++len) {
 
-            outputBuffer[len] = data[len];
+            outputBuffer[len] = cstr[len];
         }
     } else {
 
         for(int i = 0; i < len; ++i) {
 
-            outputBuffer[i] = data[i];
+            outputBuffer[i] = cstr[i];
         }
     }
 
@@ -208,18 +208,18 @@ void Uart::rcvClear() {
 
 /**
  * @brief  Get amount of bytes in internal receive buffer.
- * @retval unsigned short
+ * @retval uint16_t
  */
-auto Uart::rcvGetCount() -> unsigned short {
+auto Uart::rcvGetCount() -> uint16_t {
 
     return inputBufCnt;
 }
 
 /**
  * @brief  Get pointer to data internal receive buffer.
- * @retval char *
+ * @retval uint8_t *
  */
-auto Uart::rcvGetData() -> char * {
+auto Uart::rcvGetData() -> uint8_t * {
 
     return inputBuffer.data();
 }

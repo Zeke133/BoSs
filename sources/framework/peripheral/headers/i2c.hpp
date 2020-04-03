@@ -13,9 +13,7 @@
 
 #pragma once
 
-#include "ostream.hpp"    // debug ???
-// #include <bitBanding.hpp>
-#include "gpio.hpp"
+#include "ostream.hpp"    // debug
 #include "dma.hpp"
 
 #include <stm32f1xx_ll_i2c.h>
@@ -85,5 +83,3 @@ private:
     static void callbackOnTransmissionCompletePort2(void);
 
 };
-
-#endif

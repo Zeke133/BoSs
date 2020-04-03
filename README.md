@@ -80,6 +80,9 @@ There are two targets to copmile the project possible and handled with Cmake *CM
 - [ ] try to **simplify sleepSysCall**
 - [x] **rename svCallMock and proxy** classes
 - [x] SLEEPING threads queue
+- [ ] create vscode cmake build configuration
+- [ ] update doks
+- [ ] embed 3rd party libs using cmake
 - [ ] Context switch optimisation for 1 thread case
 - [ ] Thread SLEEP()
 - [ ] Divide to namespaces

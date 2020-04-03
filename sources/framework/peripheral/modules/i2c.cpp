@@ -13,6 +13,10 @@
 
 #include "i2c.hpp"
 
+#include "gpio.hpp"
+#include "IBitBanding.hpp"
+#include "convertation.hpp"
+
 /**
  * @brief  Driver constructor.
  * @param  portNumber: Number of I2C hardware peripheral.
@@ -27,29 +31,32 @@ I2c::I2c(uint8_t portNumber, DMA& txDMA, DMA& rxDMA, OStream& cout, uint32_t spe
       cout(cout) {
 
     GPIO_TypeDef* gpioPort;
-    uint32_t gpioPins;
+    uint32_t sclPin;
+    uint32_t sdaPin;
 
     if (portNumber == 1) {
 
         port = I2C1;
         gpioPort = GPIOB;
-        gpioPins = LL_GPIO_PIN_6 | LL_GPIO_PIN_7;
+        sclPin = LL_GPIO_PIN_6;
+        sdaPin = LL_GPIO_PIN_7;
 
         LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C1);
 
-        txDMA.setCallback(&callbackOnTransmissionCompletePort1);
-        rxDMA.setCallback(&callbackOnTransmissionCompletePort1);
+        txDMA.setCallbackOnTransferComplete(&callbackOnTransmissionCompletePort1);
+        rxDMA.setCallbackOnTransferComplete(&callbackOnTransmissionCompletePort1);
     }
     else /*if (portNumber == 2)*/ {
 
         port = I2C2;
         gpioPort = GPIOB;
-        gpioPins = LL_GPIO_PIN_10 | LL_GPIO_PIN_11;
+        sclPin = LL_GPIO_PIN_10;
+        sdaPin = LL_GPIO_PIN_11;
 
         LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_I2C2);
 
-        txDMA.setCallback(&callbackOnTransmissionCompletePort2);
-        rxDMA.setCallback(&callbackOnTransmissionCompletePort2);
+        txDMA.setCallbackOnTransferComplete(&callbackOnTransmissionCompletePort2);
+        rxDMA.setCallbackOnTransferComplete(&callbackOnTransmissionCompletePort2);
     }
 
     // Turn needed modules tacting
@@ -58,14 +65,17 @@ I2c::I2c(uint8_t portNumber, DMA& txDMA, DMA& rxDMA, OStream& cout, uint32_t spe
     // I2C configuration
     setI2c(speedClk, ownAddress);
 
-    // GPIO init for I2C
-    GPIO::initPins(gpioPort, gpioPins, LL_GPIO_MODE_ALTERNATE, LL_GPIO_OUTPUT_OPENDRAIN, LL_GPIO_PULL_DOWN, LL_GPIO_SPEED_FREQ_HIGH);
+    GPIO::enableAPB2Clock(gpioPort);
+    // Configure Tx as Alternate function open drain
+    LL_GPIO_SetPinMode(gpioPort, sclPin, LL_GPIO_MODE_ALTERNATE);
+    LL_GPIO_SetPinMode(gpioPort, sdaPin, LL_GPIO_MODE_ALTERNATE);
+    LL_GPIO_SetPinOutputType(gpioPort, sclPin, LL_GPIO_OUTPUT_OPENDRAIN);
+    LL_GPIO_SetPinOutputType(gpioPort, sdaPin, LL_GPIO_OUTPUT_OPENDRAIN);
+    LL_GPIO_SetPinSpeed(gpioPort, sclPin, LL_GPIO_SPEED_FREQ_HIGH);
+    LL_GPIO_SetPinSpeed(gpioPort, sdaPin, LL_GPIO_SPEED_FREQ_HIGH);
 
     // Enables the specified I2C peripheral.
     LL_I2C_Enable(port);
-
-    txDMA.turnOnCallback();
-    rxDMA.turnOnCallback();
 }
 
 /**
@@ -286,8 +296,8 @@ inline I2c::Status I2c::sendByte(uint8_t data) const {
         EV8: TxE=1, shift register not empty, data register empty,
         cleared by writing DR register */
         
-        cout << "\r\n SR1() " << itoa(port->SR1, 16, 4);    // 82 1000 0010
-        cout << "\r\n SR2() " << itoa(port->SR2, 16, 4);    // 7  0000 0111
+        cout << "\r\n SR1() " << Convertation::itoa(port->SR1, 16, 4);    // 82 1000 0010
+        cout << "\r\n SR2() " << Convertation::itoa(port->SR2, 16, 4);    // 7  0000 0111
 
         // if ( port->SR1 == (I2C_SR1_TXE | I2C_SR1_BTF) &&
         //      port->SR2 == (I2C_SR2_MSL | I2C_SR2_BUSY | I2C_SR2_TRA) )
@@ -343,7 +353,7 @@ I2c::Status I2c::send(uint8_t slaveAddress, uint8_t data) const {
          (status = sendByte(data)) != Status::SUCCESS ||
          (status = stopTransmission()) != Status::SUCCESS ) {
 
-        cout << "\r\n send() 1 byte ERROR = " << itoa((uint8_t)status);
+        cout << "\r\n send() 1 byte ERROR = " << Convertation::itoa((uint8_t)status);
         return status;
     }
     else {
@@ -364,20 +374,20 @@ I2c::Status I2c::send(uint8_t slaveAddress, const uint8_t * data, uint32_t size)
 
     Status status = startTransmitter(slaveAddress);
 
-    cout << "\r\n send() startTransmitter = " << itoa((uint8_t)status);
+    cout << "\r\n send() startTransmitter = " << Convertation::itoa((uint8_t)status);
     if (status != Status::SUCCESS) return status;
 
     for (uint32_t i = 0; i < size; ++i) {
 
         status = sendByte(data[i]);
 
-        cout << "\r\n send() sendByte = " << itoa((uint8_t)status);
+        cout << "\r\n send() sendByte = " << Convertation::itoa((uint8_t)status);
         if (status != Status::SUCCESS) return status;
     }
 
     status = stopTransmission();
 
-    cout << "\r\n send() stopTransmission = " << itoa((uint8_t)status);
+    cout << "\r\n send() stopTransmission = " << Convertation::itoa((uint8_t)status);
     if (status != Status::SUCCESS) return status;
 
     cout << "\r\n send() END";
@@ -408,7 +418,7 @@ I2c::Status I2c::sendBufferized(uint8_t slaveAddress, const uint8_t * data, uint
     
     Status status = startTransmitter(slaveAddress);
 
-    cout << "\r\n sendBufferized() startTransmitter = " << itoa((uint8_t)status);
+    cout << "\r\n sendBufferized() startTransmitter = " << Convertation::itoa((uint8_t)status);
     if (status != Status::SUCCESS) return status;
 
     // Turn ON DMA requests
@@ -416,7 +426,7 @@ I2c::Status I2c::sendBufferized(uint8_t slaveAddress, const uint8_t * data, uint
     LL_I2C_EnableDMAReq_TX(port);
 
     
-    txDMA.runDataTransfer((void*)&port->DR, data, size);
+    txDMA.runTransfer((void*)&port->DR, data, size);
 
     cout << "\r\n sendBufferized() END";
     return Status::SUCCESS;
@@ -451,10 +461,10 @@ I2c::Status I2c::receiveBufferized(uint8_t slaveAddress, const uint8_t * data, u
     // More than 1 byte will be received - indicating it with flag = 0.
     Status status = startReceiver(slaveAddress);
 
-    cout << "\r\n receiveBufferized() startReceiver = " << itoa((uint8_t)status);
+    cout << "\r\n receiveBufferized() startReceiver = " << Convertation::itoa((uint8_t)status);
     if (status != Status::SUCCESS) return status;
 
-    rxDMA.runDataTransfer((void*)&port->DR, data, size);
+    rxDMA.runTransfer((void*)&port->DR, data, size);
 
     // Turn ON DMA requests
     // Should be turned off after transmission

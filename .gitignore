@@ -5,7 +5,7 @@ build
 # MacOS trash
 .DS_Store
 # VSCode configuration
-.vscode
+# .vscode
 
 # Object files
 *.elf

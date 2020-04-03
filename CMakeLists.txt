@@ -12,16 +12,38 @@ enable_testing()                        # Unit tests
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)   # generate 'compile_commands.json' file for IntelliSense support
 set(CMAKE_VERBOSE_MAKEFILE OFF)         # compilation commands console output
 # ------------------------------------------------------------
-# Path to GoogleTest Framework - change for your location! Find doesn't work great with GTest.
-set(GOOGLE_TEST_DIR ${PROJECT_SOURCE_DIR}/../googleTest)
-# Path to Boost header only libraries - change for your location!
-set(BOOST_DIR ${PROJECT_SOURCE_DIR}/../boost_1_69_0)
+# Download and unpack googletest at configure time
+configure_file(googletest-download/CMakeLists.txt.in googletest-download/CMakeLists.txt)
+execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+  RESULT_VARIABLE result
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
+if(result)
+  message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+endif()
+execute_process(COMMAND ${CMAKE_COMMAND} --build .
+  RESULT_VARIABLE result
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download )
+if(result)
+  message(FATAL_ERROR "Build step for googletest failed: ${result}")
+endif()
+# Prevent overriding the parent project's compiler/linker settings on Windows
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# Add googletest directly to our build. This defines the gtest and gtest_main targets.
+add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
+                 ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
+                 EXCLUDE_FROM_ALL)
 # ------------------------------------------------------------
-set(use_libg TRUE CACHE BOOL "Use standart C++ libs in project to allow modern C++17 and STL features")
+# Path to Boost header only libraries
+find_package(Boost REQUIRED)
+if(Boost_FOUND)
+    set(BOOST_DIR ${Boost_INCLUDE_DIRS})
+endif()
+# ------------------------------------------------------------
+set(use_libg TRUE CACHE BOOL "Use C++ standart library")
 if(use_libg)
-    message("Modern C++17 and STL support activated. Largest executable size.")
+    message("C++ standart library support enabled. Largest executable size.")
 else()
-    message("Modern C++17 and STL support deactivated. Smallest executable size.")
+    message("C++ standart library support disabled. Smallest executable size.")
 endif()
 # ------------------------------------------------------------
 message("Build type: ${CMAKE_BUILD_TYPE}")

@@ -103,6 +103,9 @@ void SysTick_Handler(void) {
 /* Pre-main initialisation
  */
 #ifdef QEMU_DUMMY
+// dummy clock for QEMU
+uint32_t SystemCoreClock = 72000000U;
+
 void SystemInit(void) {
     printStr("ARM Cortex-M3 has started up!\n");
 }
@@ -121,10 +124,10 @@ void main(void) {
     delay.us(100000);
     led.on();
 
-    auto dma = DMA::make_dma<DMA::Device::USART1_TX>();
-    auto uart = Uart::make_uart<1>(dma);
+    // auto dma = DMA::make_dma<DMA::Device::USART1_TX>();
+    // auto uart = Uart::make_uart<1>(dma);
     
-    uart.puts("start");
+    // uart.puts("start");
 
     uint32_t thread1Stack[1000];
     // uint32_t thread2Stack[30];
@@ -159,8 +162,10 @@ void main(void) {
     // Scheduler::run(thread2);
 
     // where to place???
+    #ifndef QEMU_DUMMY
     // Configure the SysTick timer to overflow every 1 ms
     SysTick_Config(SystemCoreClock / 1000);
+    #endif
 
     while(1);
     

@@ -14,12 +14,11 @@ add_executable(frameworkUtilsTests)
 
 target_link_libraries(
         frameworkUtilsTests
-    PRIVATE ${GOOGLE_TEST_DIR}/googletest/make/gtest_main.a
+    PRIVATE gtest_main
 )
 
 target_include_directories(
         frameworkUtilsTests
-    PRIVATE ${GOOGLE_TEST_DIR}/googletest/include
     PRIVATE ${frameworkUtilsHeadersPath}
 )
 

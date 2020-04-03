@@ -107,7 +107,7 @@ void DMA::setCallbackOnTransferComplete(CallbackFunc func) const {
  * @param  size: Size of data to be transmited.
  * @retval None
  */
-void DMA::runTransfer(void * perephPtr, const char * memoryPtr, unsigned int size) const {
+void DMA::runTransfer(void * perephPtr, const uint8_t * memoryPtr, uint32_t size) const {
 
     // If any transfer is already in progress - wait for finish and stop transfer
     if (LL_DMA_IsEnabledChannel(config.controller, config.channel)) {
